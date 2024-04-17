@@ -1,14 +1,31 @@
 using CodeConnect.Data;
+using CodeConnect.Features.Auth;
+using CodeConnect.Features.Communities;
+using CodeConnect.Features.CommunityUsers;
+using CodeConnect.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// add user repository (DRY reasons)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Add services
+builder.Services.AddScoped<CommunityService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CommunityUserService>();
+// add auto mapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -23,8 +40,30 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// add auto mapper
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidAudience = configuration["JWT:Audience"],
+            ValidIssuer = configuration["JWT:Issuer"],
+            #pragma warning disable CS8604
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
+            #pragma warning restore CS8604
+
+        };
+    });
 
 // add CORS
 builder.Services.AddCors(options =>
@@ -105,6 +144,8 @@ app.Run();
 
 void SeedData(IHost app)
 {
+#pragma warning disable CS8604
+#pragma warning disable CS8602
     var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
 
     using (var scope = scopedFactory.CreateScope())
@@ -114,4 +155,6 @@ void SeedData(IHost app)
         UserRoleInitializer.InitializeAsync(services).Wait();
         seed.SeedDbContext();
     }
+#pragma warning restore CS8602
+#pragma warning restore CS8604
 }
