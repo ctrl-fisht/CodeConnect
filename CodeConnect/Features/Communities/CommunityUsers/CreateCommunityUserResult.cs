@@ -1,6 +1,6 @@
 ﻿using CodeConnect.Features.Communities;
 
-namespace CodeConnect.Features.CommunityUsers;
+namespace CodeConnect.Features.Communities.CommunityUsers;
 
 public class CreateCommunityUserResult
 {

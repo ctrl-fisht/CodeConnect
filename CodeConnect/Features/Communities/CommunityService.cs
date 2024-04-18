@@ -1,15 +1,10 @@
 ﻿using AutoMapper;
+using CodeConnect.CommonDto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
-using CodeConnect.Helper;
 using CodeConnect.Users;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Net.NetworkInformation;
-using System.Security.Claims;
-using System.Security.Principal;
-using System.Xml.Linq;
+
 
 namespace CodeConnect.Features.Communities;
 

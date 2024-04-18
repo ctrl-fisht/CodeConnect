@@ -1,4 +1,4 @@
-﻿namespace CodeConnect.Features.Communities;
+﻿namespace CodeConnect.CommonDto;
 
 public class CommunityDto
 {

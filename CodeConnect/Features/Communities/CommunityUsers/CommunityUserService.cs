@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
+using CodeConnect.CommonDto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
-using CodeConnect.Features.Communities;
 using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;
+#pragma warning disable CS8602
+#pragma warning disable CS8604
 
-namespace CodeConnect.Features.CommunityUsers;
+namespace CodeConnect.Features.Communities.CommunityUsers;
 
 public class CommunityUserService
 {
@@ -118,9 +120,12 @@ public class CommunityUserService
         };
     }
 
-    public async Task<List<CommunityDto>> GetSubscribed(string userName)
+    public async Task<List<CommunityDto>> GetSubscribedCommunities(string userName)
     {
         var user = await _userRepository.GetUser(userName);
+
+        if (user is null)
+            return new List<CommunityDto>();
 
         var communities = await _context
             .CommunityUsers
@@ -132,18 +137,16 @@ public class CommunityUserService
         return _mapper.Map<List<CommunityDto>>(communities);
     }
 
-    //public async Task<List<GroupDetailedDto>> GetFollowingGroups(IIdentity? identity)
-    //{
-    //    var user = await Utils.GetUserByClaims(identity, _userRepository);
-    //    var groups = await _groupRepository.GetFollowingGroups(user.Id);
+    public async Task<bool> IsSubscriber(string userName, int commId)
+    {
+        var user = await _userRepository.GetUser(userName);
 
-    //    return _mapper.Map<List<GroupDetailedDto>>(groups);
-    //}
+        if (user is null)
+            return false;
 
-    //public async Task<bool> IsSubscriber(IIdentity? identity, int groupId)
-    //{
-    //    var user = await Utils.GetUserByClaims(identity, _userRepository);
-    //    return _groupRepository.IsSubscriber(user.Id, groupId);
+        return await _context.CommunityUsers.AnyAsync(cu => cu.UserId == user.Id && cu.CommunityId == commId);
 
-    //}
+    }
 }
+#pragma warning restore CS8602
+#pragma warning disable CS8604

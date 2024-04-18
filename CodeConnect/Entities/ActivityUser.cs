@@ -6,6 +6,6 @@ public class ActivityUser
     public int ActivityId { get; set; }
     public required string UserId { get; set; }
 
-    public required Activity Activity { get; set; }
-    public required User User { get; set; }
+    public Activity Activity { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

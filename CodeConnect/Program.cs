@@ -1,7 +1,9 @@
 using CodeConnect.Data;
+using CodeConnect.Features.Activities;
+using CodeConnect.Features.Activities.ActivityUsers;
 using CodeConnect.Features.Auth;
 using CodeConnect.Features.Communities;
-using CodeConnect.Features.CommunityUsers;
+using CodeConnect.Features.Communities.CommunityUsers;
 using CodeConnect.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +22,16 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<CommunityService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CommunityUserService>();
+builder.Services.AddScoped<ActivityUserService>();
+builder.Services.AddScoped<ActivityService>();
+
 // add auto mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(x =>
+                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles); ;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

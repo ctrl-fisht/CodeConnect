@@ -1,6 +1,10 @@
-﻿namespace CodeConnect.Entities;
+﻿using CodeConnect.CommonDto;
+using CodeConnect.Entities;
+using CodeConnect.Features.Activities.ActivityUsers;
 
-public class Activity
+namespace CodeConnect.Features.Activities;
+
+public class ActivityDto
 {
     public int ActivityId { get; set; }
     public required string Title { get; set; }
@@ -15,12 +19,10 @@ public class Activity
     public string? StreamURL { get; set; }
     public bool IsActive { get; set; }
     public int TicketPrice { get; set; }
+    public CommunityDto Community { get; set; } = null!;
 
-    public City City { get; set; } = null!;
-    public User Owner { get; set; } = null!;
-    public Community Community { get; set; } = null!;
-    public IList<ActivityCategory> ActivityCategories { get; set; } = new List<ActivityCategory>();
-    public IList<ActivityTag> ActivityTags { get; set; } = new List<ActivityTag>();
-    public IList<ActivityUser> Members { get; set; } = new List<ActivityUser>();
 
+    public CityDto City { get; set; } = null!;
+    public List<ActivityCategoryDto> ActivityCategories { get; set; } = null!;
+    public List<ActivityTagDto> ActivityTags { get; set; } = null!;
 }

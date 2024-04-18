@@ -90,6 +90,7 @@ public class Seed
                 IsActive = true,
                 TicketPrice = 0,
 
+                City = cityList[0],
                 Owner = admin,
                 Community = new Community()
                 {

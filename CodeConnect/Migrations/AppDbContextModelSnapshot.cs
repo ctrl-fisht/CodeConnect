@@ -34,7 +34,7 @@ namespace CodeConnect.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("CityId")
+                    b.Property<int>("CityId")
                         .HasColumnType("integer");
 
                     b.Property<int>("CommunityId")
@@ -59,9 +59,6 @@ namespace CodeConnect.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("OwnerId")
-                        .HasColumnType("text");
-
                     b.Property<string>("StreamURL")
                         .HasColumnType("text");
 
@@ -78,13 +75,17 @@ namespace CodeConnect.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("ActivityId");
 
                     b.HasIndex("CityId");
 
                     b.HasIndex("CommunityId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Activities");
                 });
@@ -494,9 +495,11 @@ namespace CodeConnect.Migrations
 
             modelBuilder.Entity("CodeConnect.Entities.Activity", b =>
                 {
-                    b.HasOne("CodeConnect.Entities.City", null)
+                    b.HasOne("CodeConnect.Entities.City", "City")
                         .WithMany("Activities")
-                        .HasForeignKey("CityId");
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CodeConnect.Entities.Community", "Community")
                         .WithMany("Activities")
@@ -504,13 +507,15 @@ namespace CodeConnect.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CodeConnect.Entities.User", "Owner")
+                    b.HasOne("CodeConnect.Entities.User", null)
                         .WithMany("ActivitiesOwned")
-                        .HasForeignKey("OwnerId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
 
                     b.Navigation("Community");
-
-                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("CodeConnect.Entities.ActivityCategory", b =>

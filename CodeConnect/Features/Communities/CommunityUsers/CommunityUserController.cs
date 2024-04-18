@@ -2,8 +2,10 @@
 using CodeConnect.Features.Communities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+#pragma warning disable CS8604
+#pragma warning disable CS8602
 
-namespace CodeConnect.Features.CommunityUsers;
+namespace CodeConnect.Features.Communities.CommunityUsers;
 
 [Route("api/")]
 [ApiController]
@@ -74,5 +76,25 @@ public class CommunityUserController : ControllerBase
             default: throw new ArgumentOutOfRangeException();
         }
     }
+
+    [Authorize]
+    [HttpGet]
+    [Route("group/subscribed")]
+    public async Task<IActionResult> GetSubscribedCommunities()
+    {
+        return Ok(await _communityUserService.GetSubscribedCommunities(User.Identity.Name));
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("group/{commId}/subscribed")]
+    public async Task<IActionResult> IsSubscriberOf(int commId)
+    {
+        return Ok(new { result = await _communityUserService.IsSubscriber(User.Identity.Name, commId) });
+    }
+
+
 }
 
+#pragma warning restore CS8604
+#pragma warning restore CS8602
