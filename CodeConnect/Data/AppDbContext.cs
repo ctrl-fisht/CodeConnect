@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Hosting;
+using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 
 namespace CodeConnect.Data;
 
@@ -11,6 +14,14 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
 
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Activity>().HasQueryFilter(a => !a.Deleted);
+        modelBuilder.Entity<Community>().HasQueryFilter(c => !c.Deleted);
     }
 
     public DbSet<User> AppUsers { get; set; } = null!;

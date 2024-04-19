@@ -1,9 +1,13 @@
 using CodeConnect.Data;
 using CodeConnect.Features.Activities;
 using CodeConnect.Features.Activities.ActivityUsers;
+using CodeConnect.Features.Activities.Search;
 using CodeConnect.Features.Auth;
+using CodeConnect.Features.Caterories;
+using CodeConnect.Features.Cities;
 using CodeConnect.Features.Communities;
 using CodeConnect.Features.Communities.CommunityUsers;
+using CodeConnect.Features.Tags;
 using CodeConnect.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +28,10 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CommunityUserService>();
 builder.Services.AddScoped<ActivityUserService>();
 builder.Services.AddScoped<ActivityService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<TagService>();
+builder.Services.AddScoped<CityService>();
+builder.Services.AddScoped<SearchService>();
 
 // add auto mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

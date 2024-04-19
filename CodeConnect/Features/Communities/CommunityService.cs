@@ -104,8 +104,8 @@ public class CommunityService
             {
                 Status = DeleteCommunityStatus.UserHasNoAccess
             };
-
-        _context.Remove(community);
+        community.Deleted = true;
+        _context.Update(community);
         var result = await _context.SaveChangesAsync() > 0 ? true : false;
 
         if (!result)

@@ -19,7 +19,9 @@ public class ActivityController : ControllerBase
     [Route("{actId}")]
     public async Task<IActionResult> GetActivityById(int actId)
     {
-        var activity = await _activityService.Get(actId);
+        // авторизован ли пользователь, если да то мероприятие без времени пользователя
+        ActivityDto? activity = await _activityService.Get(actId);
+        
 
         if (activity is null)
             return NotFound();
@@ -57,7 +59,7 @@ public class ActivityController : ControllerBase
 
             case CreateActivityStatus.BadTags:
                 return StatusCode(409, new { success = true, message = "Таких тэгов нету в базе" });
-            
+
             case CreateActivityStatus.BadCategories:
                 return StatusCode(409, new { success = true, message = "Таких категорий нету в базе" });
 
@@ -119,5 +121,48 @@ public class ActivityController : ControllerBase
             // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
             default: throw new ArgumentOutOfRangeException();
         }
+    }
+
+    [Authorize]
+    [HttpDelete]
+    [Route("{actId}")]
+    public async Task<IActionResult> DeleteActivity(int actId)
+    {
+        var result = await _activityService.DeleteActivity(actId, User.Identity.Name);
+
+        switch (result.Status)
+        {
+            case DeleteActivityStatus.UserDoesntExist:
+                return BadRequest(new { success = false, message = "Ошибка авторизации" });
+
+            case DeleteActivityStatus.ErrorWhileDeleting:
+                return StatusCode(500, new { success = false, message = "Ошибка во время удаления" });
+
+            case DeleteActivityStatus.ActivityDoesntExist:
+                return NotFound(new { success = false, message = "Данного мероприятия не существует" });
+
+            case DeleteActivityStatus.Successful:
+                return StatusCode(201, new { success = true, message = "Мероприятие успешно обновлено" });
+
+            case DeleteActivityStatus.UserHasNoAccess:
+                return StatusCode(401, new { success = true, message = "У вас нет доступа к этому мероприятию или сообществу" });
+
+            // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
+            default: throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("nearest")]
+    public async Task<IActionResult> GetNearestActivities(int offset, int count)
+    {
+        var result = await _activityService.GetNearest(offset, count);
+
+        if (result is null)
+            return NotFound();
+
+        return Ok(result);
+        
     }
 }

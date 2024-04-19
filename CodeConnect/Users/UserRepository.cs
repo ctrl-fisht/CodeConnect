@@ -47,6 +47,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUsers
             .Where(u => u.UserName == userName)
+            .Include(u => u.City)
             .FirstOrDefaultAsync();
     }
 }

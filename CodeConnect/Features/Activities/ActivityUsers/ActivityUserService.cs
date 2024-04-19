@@ -147,5 +147,6 @@ public class ActivityUserService
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
+        
     }
 }

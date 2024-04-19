@@ -12,6 +12,7 @@ public class ActivityDto
     public TimeOnly TimeLocal { get; set; }
     public DateOnly DateUtc { get; set; }
     public TimeOnly TimeUtc { get; set; }
+   
     public string Description { get; set; } = "";
     public string Address { get; set; } = "";
     public int DurationMinutes { get; set; }

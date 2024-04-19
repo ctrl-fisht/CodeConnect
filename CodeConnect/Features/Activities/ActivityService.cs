@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using CodeConnect.CommonDto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
-using CodeConnect.Helper;
 using CodeConnect.Users;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Security.Principal;
+
 
 namespace CodeConnect.Features.Activities;
 
@@ -26,6 +21,7 @@ public class ActivityService
 
     public async Task<ActivityDto?> Get(int actId)
     {
+
         var activity = await _context
             .Activities
             .Include(a => a.City)
@@ -38,6 +34,27 @@ public class ActivityService
             return null;
 
         return _mapper.Map<ActivityDto>(activity);
+
+    }
+
+    public async Task<List<ActivityDto>?> GetNearest(int offset, int count)
+    {
+        var activities = await _context
+            .Activities
+            .Skip(offset)
+            .Take(count)
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .OrderBy(a => a.DateUtc)
+            .ToListAsync();
+
+        if (activities is null)
+            return null;
+
+        return _mapper.Map<List<ActivityDto>>(activities);
+
     }
 
     public async Task<CreateActivityResult> CreateActivity(CreateActivityInput input, string username)
@@ -101,9 +118,10 @@ public class ActivityService
 
         var newActivity = _mapper.Map<Activity>(input);
 
-        // подумать...
-        newActivity.TimeUtc = newActivity.TimeLocal.AddHours(city.UtcOffsetHours);
-        newActivity.DateUtc = newActivity.DateLocal;
+        // считаем из локального времени + часового пояса города в котором мероприятие - UTC время и дату
+        var utcDateAndTime = TimeConverter.CalculateUtcFromLocal(newActivity.DateLocal, newActivity.TimeLocal, city.UtcOffsetHours);
+        newActivity.TimeUtc = utcDateAndTime.Item2;
+        newActivity.DateUtc = utcDateAndTime.Item1;
         
         newActivity.IsActive = true;
 
@@ -149,10 +167,12 @@ public class ActivityService
             .Include(a => a.Community)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
-            .OrderBy(a => a.ActivityId)
+            .OrderBy(a => a.DateUtc)
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
+
+
     }
 
     public async Task<UpdateActivityResult> UpdateActivity(int actId, UpdateActivityInput input, string username)
@@ -327,6 +347,46 @@ public class ActivityService
         return new UpdateActivityResult
         {
             Status = UpdateActivityStatus.Successful
+        };
+    }
+    public async Task<DeleteActivityResult> DeleteActivity(int actId, string username)
+    {
+        var user = await _userRepository.GetUser(username);
+        if (user is null)
+            return new DeleteActivityResult
+            {
+                Status = DeleteActivityStatus.UserDoesntExist
+            };
+
+        
+        // проверка мероприятия - есть ли в базе?
+        var activity = await _context.Activities.FindAsync(actId);
+        if (activity is null)
+            return new DeleteActivityResult
+            {
+                Status = DeleteActivityStatus.ActivityDoesntExist
+            };
+
+        // есть ли у пользователя доступ к этой группе
+        if (activity.Owner.Id != user.Id)
+            return new DeleteActivityResult
+            {
+                Status = DeleteActivityStatus.UserHasNoAccess
+            };
+        // soft удаление
+        activity.Deleted = true;
+        _context.Update(activity);
+
+        var result = await _context.SaveChangesAsync() > 0 ? true : false;
+        if (!result)
+            return new DeleteActivityResult
+            {
+                Status = DeleteActivityStatus.ErrorWhileDeleting
+            };
+
+        return new DeleteActivityResult
+        {
+            Status = DeleteActivityStatus.Successful
         };
     }
 }

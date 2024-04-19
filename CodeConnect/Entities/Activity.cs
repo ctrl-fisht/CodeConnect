@@ -16,6 +16,9 @@ public class Activity
     public bool IsActive { get; set; }
     public int TicketPrice { get; set; }
 
+    public bool Deleted { get; set; } = false;
+
+
     public City City { get; set; } = null!;
     public User Owner { get; set; } = null!;
     public Community Community { get; set; } = null!;
