@@ -317,6 +317,9 @@ public class ActivityService
         if (input.TicketPrice != null)
             activity.TicketPrice = (int)input.TicketPrice;
 
+        if (input.WebsiteURL != null)
+            activity.WebsiteURL = input.WebsiteURL;
+        
         if (input.TagsIds != null && input.TagsIds.Count > 0)
         {
             activity.ActivityTags = new List<ActivityTag>();
@@ -388,5 +391,25 @@ public class ActivityService
         {
             Status = DeleteActivityStatus.Successful
         };
+    }
+
+    public async Task<List<ActivityDto>> GetUserActivities(string username)
+    {
+        var user = await _userRepository.GetUser(username);
+
+        if (user is null)
+            return new List<ActivityDto>();
+
+        var activities = await _context
+            .Activities
+            .Include(a => a.Owner)
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Where(a => a.Owner.Id == user.Id)
+            .ToListAsync();
+
+        return _mapper.Map<List<ActivityDto>>(activities);
     }
 }

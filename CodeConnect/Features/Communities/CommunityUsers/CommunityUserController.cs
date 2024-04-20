@@ -21,7 +21,7 @@ public class CommunityUserController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [Route("group/{commId}/subscribe")]
+    [Route("community/{commId}/subscribe")]
     public async Task<IActionResult> Subscribe(int commId)
     {
         var result = await _communityUserService.Create(commId, User.Identity.Name);
@@ -50,7 +50,7 @@ public class CommunityUserController : ControllerBase
 
     [Authorize]
     [HttpDelete]
-    [Route("group/{commId}/unsubscribe")]
+    [Route("community/{commId}/unsubscribe")]
     public async Task<IActionResult> Unsubscribe(int commId)
     {
         var result = await _communityUserService.Delete(commId, User.Identity.Name);
@@ -79,7 +79,7 @@ public class CommunityUserController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    [Route("group/subscribed")]
+    [Route("community/subscribed")]
     public async Task<IActionResult> GetSubscribedCommunities()
     {
         return Ok(await _communityUserService.GetSubscribedCommunities(User.Identity.Name));
@@ -87,7 +87,7 @@ public class CommunityUserController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    [Route("group/{commId}/subscribed")]
+    [Route("community/{commId}/subscribed")]
     public async Task<IActionResult> IsSubscriberOf(int commId)
     {
         return Ok(new { result = await _communityUserService.IsSubscriber(User.Identity.Name, commId) });

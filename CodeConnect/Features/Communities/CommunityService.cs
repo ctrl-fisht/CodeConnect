@@ -2,6 +2,7 @@
 using CodeConnect.CommonDto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
+using CodeConnect.Features.Activities;
 using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -169,5 +170,35 @@ public class CommunityService
         {
             Status = UpdateCommunityStatus.Successful
         };
+    }
+
+    public async Task<List<CommunityDto>> GetUserCommunities(string username)
+    {
+        var user = await _userRepository.GetUser(username);
+
+        if (user is null)
+            return new List<CommunityDto>();
+
+        var communities = await _context
+            .Communities
+            .Include(c => c.Owner)
+            .Where(c => c.Owner.Id == user.Id)
+            .ToListAsync();
+
+        return _mapper.Map<List<CommunityDto>>(communities);
+    }
+
+    public async Task<List<ActivityDto>> GetCommunityActivities(int commId)
+    {
+        var activities = await _context
+            .Activities
+            .Include(a => a.Community)
+            .Include(a => a.City)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Where(a => a.Community.CommunityId == commId)
+            .ToListAsync();
+
+        return _mapper.Map<List<ActivityDto>>(activities);
     }
 }

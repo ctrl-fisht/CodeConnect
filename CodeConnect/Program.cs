@@ -140,11 +140,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
 {

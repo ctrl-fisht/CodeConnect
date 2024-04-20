@@ -32,6 +32,9 @@ public class CreateActivityInput
     public bool HasStream { get; set; }
 
     [StringLength(300, MinimumLength = 5, ErrorMessage = "Длина URL до 300 символов")]
+    public string? WebsiteURL { get; set; } = null; 
+
+    [StringLength(300, MinimumLength = 5, ErrorMessage = "Длина URL до 300 символов")]
     public string? StreamURL { get; set; }
     public int TicketPrice { get; set; }
 

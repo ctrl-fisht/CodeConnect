@@ -14,7 +14,6 @@ public class CityController : ControllerBase
         _cityService = cityService;
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetCityList()
     {

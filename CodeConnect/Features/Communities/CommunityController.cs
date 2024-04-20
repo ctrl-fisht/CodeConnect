@@ -122,5 +122,24 @@ public class CommunityController : ControllerBase
         }
     }
 
+    [Authorize]
+    [HttpGet]
+    [Route("my")]
+    public async Task<IActionResult> GetMyCommunities()
+    {
+        var result = await _communityService.GetUserCommunities(User.Identity.Name);
+
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("{commId}/activity")]
+    public async Task<IActionResult> GetCommunityActivities(int commId)
+    {
+        var result = await _communityService.GetCommunityActivities(commId);
+
+        return Ok(result);
+    }
 
 }

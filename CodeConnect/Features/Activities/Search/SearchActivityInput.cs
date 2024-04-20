@@ -4,7 +4,6 @@ namespace CodeConnect.Features.Activities.Search;
 
 public class SearchActivityInput
 {
-    [StringLength(100, MinimumLength = 5, ErrorMessage = "Длина названия от 5 до 100 символов")]
     public string? Title { get; set; } = null!;
 
     public DateOnly? DateLocal { get; set; } = null!;

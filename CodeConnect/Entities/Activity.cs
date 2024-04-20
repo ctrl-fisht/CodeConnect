@@ -13,9 +13,10 @@ public class Activity
     public int DurationMinutes { get; set; }
     public bool HasStream { get; set; }
     public string? StreamURL { get; set; }
+    public string? WebsiteURL { get; set; }
     public bool IsActive { get; set; }
     public int TicketPrice { get; set; }
-
+    
     public bool Deleted { get; set; } = false;
 
 

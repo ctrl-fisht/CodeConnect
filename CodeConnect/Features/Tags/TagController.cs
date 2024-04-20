@@ -14,7 +14,6 @@ public class TagController : ControllerBase
     }
 
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetTagsList()
     {

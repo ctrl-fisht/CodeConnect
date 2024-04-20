@@ -165,4 +165,14 @@ public class ActivityController : ControllerBase
         return Ok(result);
         
     }
+
+    [Authorize]
+    [HttpGet]
+    [Route("my")]
+    public async Task<IActionResult> GetMyActivities()
+    {
+        var result = await _activityService.GetUserActivities(User.Identity.Name);
+
+        return Ok(result);
+    }
 }

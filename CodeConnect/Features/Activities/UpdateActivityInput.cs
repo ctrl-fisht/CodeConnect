@@ -25,6 +25,10 @@ public class UpdateActivityInput
 
     [StringLength(300, MinimumLength = 5, ErrorMessage = "Длина URL до 300 символов")]
     public string? StreamURL { get; set; } = null!;
+
+    [StringLength(300, MinimumLength = 5, ErrorMessage = "Длина URL до 300 символов")]
+    public string? WebsiteURL { get; set; } = null;
+
     public int? TicketPrice { get; set; } = null!;
 
     public List<int>? TagsIds { get; set; } = null!;
