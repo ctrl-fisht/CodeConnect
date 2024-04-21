@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using CodeConnect.Dto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
 using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 
 namespace CodeConnect.Features.Activities;
@@ -12,11 +15,14 @@ public class ActivityService
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly AppDbContext _context;
-    public ActivityService(IUserRepository userRepository, IMapper mapper, AppDbContext context)
+    private readonly IWebHostEnvironment _env;
+    
+    public ActivityService(IUserRepository userRepository, IMapper mapper, AppDbContext context, IWebHostEnvironment env)
     {
         _userRepository = userRepository;
         _mapper = mapper;
         _context = context;
+        _env = env;
     }
 
     public async Task<ActivityDto?> Get(int actId)
@@ -28,6 +34,7 @@ public class ActivityService
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.Community)
+            .Include(a => a.Image)
             .Where(a => a.ActivityId == actId).FirstOrDefaultAsync();
         
         if (activity is null)
@@ -167,6 +174,7 @@ public class ActivityService
             .Include(a => a.Community)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
             .OrderBy(a => a.DateUtc)
             .ToListAsync();
 
@@ -352,6 +360,181 @@ public class ActivityService
             Status = UpdateActivityStatus.Successful
         };
     }
+
+    public async Task<UpdateActivitySmallPhotoResult> UpdateSmallPhoto(int actId, IFormFile file, string username)
+    {
+        var user = await _userRepository.GetUser(username);
+        if (user is null)
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.UserDoesntExist
+            };
+
+        // проверка мероприятия - есть ли в базе?
+        var activity = await _context.Activities.FindAsync(actId);
+        if (activity is null)
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.ActivityDoesntExist
+            };
+
+        // есть ли у пользователя доступ к этой группе
+        if (activity.Owner.Id != user.Id)
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.UserHasNoAccess
+            };
+
+        // проверка РАЗМЕРА ФАЙЛА
+        var lengthMb = file.Length / 1024 / 1024;
+        if (lengthMb > 5)
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.FileTooBig
+            };
+
+        // Проверка - картинка ли это
+        if (!file.ContentType.StartsWith("image/"))
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.IncorrectFormat
+            };
+
+        var relativePath = $"images\\activity\\{actId}";
+        var fileName = "small.jpg";
+        var concretePath = Path.Combine(_env.WebRootPath, relativePath);
+
+        if (!Path.Exists(concretePath))
+            Directory.CreateDirectory(concretePath);
+
+        var fullPath = Path.Combine(concretePath, fileName);
+
+        using var image = Image.Load(file.OpenReadStream());
+        image.Mutate(x => x.Resize(144, 144));
+        image.SaveAsJpeg(fullPath);
+
+        var activityImage = await _context
+            .ActivityImages
+            .Where(ai => ai.ActivityId == activity.ActivityId)
+            .FirstOrDefaultAsync();
+
+        // путь по которому мы будем получать картинку на фронтенде
+        var smallPath = $"/images/activity/{actId}/small.jpg";
+
+        // если не было ActivityImage записи 
+        if (activityImage is null)
+        {
+            activityImage = new ActivityImage() { ActivityId = activity.ActivityId };
+            activityImage.SmallPath = smallPath;
+            _context.ActivityImages.Add(activityImage);
+        }
+        else
+        {
+            activityImage.SmallPath = smallPath;
+            _context.ActivityImages.Update(activityImage);
+        }
+
+        
+        var result = await _context.SaveChangesAsync() > 0 ? true : false;
+        if (!result)
+            return new UpdateActivitySmallPhotoResult
+            {
+                Status = UpdateActivitySmallPhotoStatus.ErrorWhileUpdating
+            };
+
+        return new UpdateActivitySmallPhotoResult
+        {
+            Status = UpdateActivitySmallPhotoStatus.Successful
+        };
+    }
+
+    public async Task<UpdateActivityBannerPhotoResult> UpdateBannerPhoto(int actId, IFormFile file, string username)
+    {
+        var user = await _userRepository.GetUser(username);
+        if (user is null)
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.UserDoesntExist
+            };
+
+        // проверка мероприятия - есть ли в базе?
+        var activity = await _context.Activities.FindAsync(actId);
+        if (activity is null)
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.ActivityDoesntExist
+            };
+
+        // есть ли у пользователя доступ к этой группе
+        if (activity.Owner.Id != user.Id)
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.UserHasNoAccess
+            };
+
+        // проверка РАЗМЕРА ФАЙЛА
+        var lengthMb = file.Length / 1024 / 1024;
+        if (lengthMb > 5)
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.FileTooBig
+            };
+
+        // Проверка - картинка ли это
+        if (!file.ContentType.StartsWith("image/"))
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.IncorrectFormat
+            };
+
+        var relativePath = $"images\\activity\\{actId}";
+        var fileName = "banner.jpg";
+        var concretePath = Path.Combine(_env.WebRootPath, relativePath);
+
+        if (!Path.Exists(concretePath))
+            Directory.CreateDirectory(concretePath);
+
+        var fullPath = Path.Combine(concretePath, fileName);
+
+        using var image = Image.Load(file.OpenReadStream());
+        image.Mutate(x => x.Resize(1536, 384));
+        image.SaveAsJpeg(fullPath);
+
+        var activityImage = await _context
+            .ActivityImages
+            .Where(ai => ai.ActivityId == activity.ActivityId)
+            .FirstOrDefaultAsync();
+
+        // путь по которому мы будем получать картинку на фронтенде
+        var bannerPath = $"/images/activity/{actId}/banner.jpg";
+
+        // если не было ActivityImage записи 
+        if (activityImage is null)
+        {
+            activityImage = new ActivityImage() { ActivityId = activity.ActivityId };
+            activityImage.BannerPath = bannerPath;
+            _context.ActivityImages.Add(activityImage);
+        }
+        else
+        {
+            activityImage.BannerPath = bannerPath;
+            _context.ActivityImages.Update(activityImage);
+        }
+
+
+        var result = await _context.SaveChangesAsync() > 0 ? true : false;
+        if (!result)
+            return new UpdateActivityBannerPhotoResult
+            {
+                Status = UpdateActivityBannerPhotoStatus.ErrorWhileUpdating
+            };
+
+        return new UpdateActivityBannerPhotoResult
+        {
+            Status = UpdateActivityBannerPhotoStatus.Successful
+        };
+    }
+
     public async Task<DeleteActivityResult> DeleteActivity(int actId, string username)
     {
         var user = await _userRepository.GetUser(username);
@@ -370,7 +553,7 @@ public class ActivityService
                 Status = DeleteActivityStatus.ActivityDoesntExist
             };
 
-        // есть ли у пользователя доступ к этой группе
+        // есть ли у пользователя доступ к этому мероприятию
         if (activity.Owner.Id != user.Id)
             return new DeleteActivityResult
             {
@@ -407,9 +590,11 @@ public class ActivityService
             .Include(a => a.Community)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
             .Where(a => a.Owner.Id == user.Id)
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
     }
+
 }

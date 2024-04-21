@@ -1,8 +1,6 @@
-﻿using CodeConnect.CommonDto;
-using CodeConnect.Entities;
-using CodeConnect.Features.Activities.ActivityUsers;
+﻿using CodeConnect.Entities;
 
-namespace CodeConnect.Features.Activities;
+namespace CodeConnect.Dto;
 
 public class ActivityDto
 {
@@ -12,7 +10,7 @@ public class ActivityDto
     public TimeOnly TimeLocal { get; set; }
     public DateOnly DateUtc { get; set; }
     public TimeOnly TimeUtc { get; set; }
-   
+
     public string Description { get; set; } = "";
     public string Address { get; set; } = "";
     public int DurationMinutes { get; set; }
@@ -22,6 +20,7 @@ public class ActivityDto
     public int TicketPrice { get; set; }
     public CommunityDto Community { get; set; } = null!;
 
+    public ActivityImageDto Image { get; set; } = null!;
 
     public CityDto City { get; set; } = null!;
     public List<ActivityCategoryDto> ActivityCategories { get; set; } = null!;

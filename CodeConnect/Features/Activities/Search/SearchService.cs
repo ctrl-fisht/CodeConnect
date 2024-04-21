@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using CodeConnect.Dto;
 using CodeConnect.Data;
-using CodeConnect.Features.Activities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 

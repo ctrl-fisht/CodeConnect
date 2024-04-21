@@ -55,8 +55,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -141,6 +139,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

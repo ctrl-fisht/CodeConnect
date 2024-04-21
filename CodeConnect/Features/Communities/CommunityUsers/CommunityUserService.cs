@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CodeConnect.CommonDto;
+using CodeConnect.Dto;
 using CodeConnect.Data;
 using CodeConnect.Entities;
 using CodeConnect.Users;
@@ -129,7 +129,7 @@ public class CommunityUserService
 
         var communities = await _context
             .CommunityUsers
-            .Include(cu => cu.Community)
+            .Include(cu => cu.Community).ThenInclude(c => c.Image)
             .Where(cu => cu.UserId == user.Id)
             .Select(cu => cu.Community)
             .ToListAsync();

@@ -1,4 +1,4 @@
-﻿using CodeConnect.CommonDto;
+﻿using CodeConnect.Dto;
 using CodeConnect.Entities;
 using CodeConnect.Features.Activities.ActivityUsers;
 using System.ComponentModel.DataAnnotations;

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CodeConnect.CommonDto;
+using CodeConnect.Dto;
 using CodeConnect.Data;
 using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;

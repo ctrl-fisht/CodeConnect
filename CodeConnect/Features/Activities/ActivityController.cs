@@ -1,4 +1,4 @@
-﻿using CodeConnect.Features.Communities;
+﻿using CodeConnect.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -174,5 +174,75 @@ public class ActivityController : ControllerBase
         var result = await _activityService.GetUserActivities(User.Identity.Name);
 
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPut]
+    [Route("{actId}/image/small")]
+    public async Task<IActionResult> UpdateSmallImage(int actId, IFormFile file)
+    {
+        var result = await _activityService.UpdateSmallPhoto(actId, file, User.Identity.Name);
+
+        switch (result.Status)
+        {
+            case UpdateActivitySmallPhotoStatus.UserDoesntExist:
+                return BadRequest(new { success = false, message = "Ошибка авторизации" });
+
+            case UpdateActivitySmallPhotoStatus.ErrorWhileUpdating:
+                return StatusCode(500, new { success = false, message = "Ошибка во время обновления" });
+
+            case UpdateActivitySmallPhotoStatus.ActivityDoesntExist:
+                return NotFound(new { success = false, message = "Данного мероприятия не существует" });
+
+            case UpdateActivitySmallPhotoStatus.Successful:
+                return StatusCode(201, new { success = true, message = "Фото успешно обновлено" });
+
+            case UpdateActivitySmallPhotoStatus.IncorrectFormat:
+                return BadRequest(new { success = false, message = "Неправильный формат файла, поддерживаются только изображения" });
+
+            case UpdateActivitySmallPhotoStatus.FileTooBig:
+                return BadRequest(new { success = false, message = "Размер файла не должен превышать 5 МБ" });
+
+            case UpdateActivitySmallPhotoStatus.UserHasNoAccess:
+                return StatusCode(401, new { success = true, message = "У вас нет доступа к этому мероприятию" });
+
+            // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
+            default: throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    [Authorize]
+    [HttpPut]
+    [Route("{actId}/image/banner")]
+    public async Task<IActionResult> UpdateBannerImage(int actId, IFormFile file)
+    {
+        var result = await _activityService.UpdateBannerPhoto(actId, file, User.Identity.Name);
+
+        switch (result.Status)
+        {
+            case UpdateActivityBannerPhotoStatus.UserDoesntExist:
+                return BadRequest(new { success = false, message = "Ошибка авторизации" });
+
+            case UpdateActivityBannerPhotoStatus.ErrorWhileUpdating:
+                return StatusCode(500, new { success = false, message = "Ошибка во время обновления" });
+
+            case UpdateActivityBannerPhotoStatus.ActivityDoesntExist:
+                return NotFound(new { success = false, message = "Данного мероприятия не существует" });
+
+            case UpdateActivityBannerPhotoStatus.Successful:
+                return StatusCode(201, new { success = true, message = "Фото успешно обновлено" });
+
+            case UpdateActivityBannerPhotoStatus.IncorrectFormat:
+                return BadRequest(new { success = false, message = "Неправильный формат файла, поддерживаются только изображения" });
+
+            case UpdateActivityBannerPhotoStatus.FileTooBig:
+                return BadRequest(new { success = false, message = "Размер файла не должен превышать 5 МБ" });
+
+            case UpdateActivityBannerPhotoStatus.UserHasNoAccess:
+                return StatusCode(401, new { success = true, message = "У вас нет доступа к этому мероприятию" });
+
+            // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
+            default: throw new ArgumentOutOfRangeException();
+        }
     }
 }

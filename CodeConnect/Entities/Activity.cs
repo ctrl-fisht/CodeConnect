@@ -19,7 +19,8 @@ public class Activity
     
     public bool Deleted { get; set; } = false;
 
-
+    
+    public ActivityImage Image { get; set; } = null!;
     public City City { get; set; } = null!;
     public User Owner { get; set; } = null!;
     public Community Community { get; set; } = null!;

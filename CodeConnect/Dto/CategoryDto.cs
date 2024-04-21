@@ -1,4 +1,4 @@
-﻿namespace CodeConnect.CommonDto;
+﻿namespace CodeConnect.Dto;
 
 public class CategoryDto
 {

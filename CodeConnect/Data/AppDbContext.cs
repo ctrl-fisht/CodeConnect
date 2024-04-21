@@ -2,10 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Hosting;
-using System.Reflection.Metadata;
-using System.Text.RegularExpressions;
 
 namespace CodeConnect.Data;
 
@@ -34,5 +30,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Community> Communities { get; set; }
     public DbSet<CommunityUser> CommunityUsers { get; set; }
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<ActivityImage> ActivityImages { get; set; }
+    public DbSet<CommunityImage> CommunityImages { get; set; }
 
 }

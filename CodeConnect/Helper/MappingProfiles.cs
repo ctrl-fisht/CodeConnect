@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using CodeConnect.CommonDto;
+using CodeConnect.Dto;
 using CodeConnect.Entities;
 using CodeConnect.Features.Activities;
-using CodeConnect.Features.Activities.ActivityUsers;
 using CodeConnect.Features.Communities;
 
 namespace CodeConnect.Helper;
@@ -26,5 +25,8 @@ public class MappingProfiles : Profile
         CreateMap<Tag, TagDto>();
 
         CreateMap<CreateActivityInput, Activity>();
+
+        CreateMap<ActivityImage, ActivityImageDto>();
+        CreateMap<CommunityImage, CommunityImageDto>();
     }
 }
