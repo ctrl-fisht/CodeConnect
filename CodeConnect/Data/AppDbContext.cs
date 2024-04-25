@@ -32,5 +32,6 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ActivityImage> ActivityImages { get; set; }
     public DbSet<CommunityImage> CommunityImages { get; set; }
+    public DbSet<TelegramConnection> TelegramConnections { get; set; }
 
 }

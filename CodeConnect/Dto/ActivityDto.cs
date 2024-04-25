@@ -18,6 +18,8 @@ public class ActivityDto
     public string? StreamURL { get; set; }
     public bool IsActive { get; set; }
     public int TicketPrice { get; set; }
+    public string? WebsiteURL { get; set; }
+
     public CommunityDto Community { get; set; } = null!;
 
     public ActivityImageDto Image { get; set; } = null!;

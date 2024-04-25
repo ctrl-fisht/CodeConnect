@@ -68,6 +68,7 @@ public class SearchService
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.City)
+            .Include(a => a.Image)
             .Include(a => a.Community)
             .ToListAsync();
 

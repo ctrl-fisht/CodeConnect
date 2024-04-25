@@ -8,6 +8,8 @@ using CodeConnect.Features.Cities;
 using CodeConnect.Features.Communities;
 using CodeConnect.Features.Communities.CommunityUsers;
 using CodeConnect.Features.Tags;
+using CodeConnect.Features.Telegram;
+using CodeConnect.TelegramBot;
 using CodeConnect.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +34,11 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<CityService>();
 builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<TelegramService>();
+
+// add hosted services
+builder.Services.AddHostedService<TelegramBotService>();
+
 
 // add auto mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -140,7 +147,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (context.File.Name.EndsWith(".jpg") || context.File.Name.EndsWith(".png"))
+        {
+            context.Context.Response.Headers.Append("Cache-Control", "no-store, no-cache");
+        }
+    }
+});
 
 app.UseAuthorization();
 

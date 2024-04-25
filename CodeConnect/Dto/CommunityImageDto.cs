@@ -4,4 +4,6 @@ public class CommunityImageDto
 {
     public string? SmallPath { get; set; }
     public string? MiniPath { get; set; }
+    public string? BigPath { get; set; }
+
 }

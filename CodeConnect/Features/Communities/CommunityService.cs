@@ -212,13 +212,105 @@ public class CommunityService
         return _mapper.Map<List<ActivityDto>>(activities);
     }
 
-    public async Task<UpdateCommunityMiniPhotoResult> UpdateMiniPhoto(int commId, IFormFile file, string username)
+    //public async Task<UpdateCommunityMiniPhotoResult> UpdateMiniPhoto(int commId, IFormFile file, string username)
+    //{
+    //    var user = await _userRepository.GetUser(username);
+    //    if (user is null)
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.UserDoesntExist
+    //        };
+
+    //    // проверка сообщества - есть ли в базе?
+    //    var community = await _context.Communities
+    //        .Include(c => c.Owner)
+    //        .Where(c => c.CommunityId == commId)
+    //        .FirstOrDefaultAsync();
+
+    //    if (community is null)
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.CommunityDoesntExist
+    //        };
+
+
+    //    // принадлежит ли комьюнити пользователю
+    //    if (!(user?.Id == community.Owner.Id))
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.UserHasNoAccess
+    //        };
+
+    //    // проверка РАЗМЕРА ФАЙЛА
+    //    var lengthMb = file.Length / 1024 / 1024;
+    //    if (lengthMb > 5)
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.FileTooBig
+    //        };
+
+    //    // Проверка - картинка ли это
+    //    if (!file.ContentType.StartsWith("image/"))
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.IncorrectFormat
+    //        };
+
+    //    var relativePath = $"images\\community\\{commId}";
+    //    var fileName = "mini.jpg";
+    //    var concretePath = Path.Combine(_env.WebRootPath, relativePath);
+
+    //    if (!Path.Exists(concretePath))
+    //        Directory.CreateDirectory(concretePath);
+
+    //    var fullPath = Path.Combine(concretePath, fileName);
+
+    //    using var image = Image.Load(file.OpenReadStream());
+    //    image.Mutate(x => x.Resize(50, 50));
+    //    image.SaveAsJpeg(fullPath);
+
+    //    var communityImage = await _context
+    //        .CommunityImages
+    //        .Where(ci => ci.CommunityId == community.CommunityId)
+    //        .FirstOrDefaultAsync();
+
+    //    // путь по которому мы будем получать картинку на фронтенде
+    //    var miniPath = $"/images/community/{commId}/mini.jpg";
+
+    //    // если не было CommunityImage записи 
+    //    if (communityImage is null)
+    //    {
+    //        communityImage = new CommunityImage() { CommunityId = community.CommunityId };
+    //        communityImage.MiniPath = miniPath;
+    //        _context.CommunityImages.Add(communityImage);
+    //    }
+    //    else
+    //    {
+    //        communityImage.MiniPath = miniPath;
+    //        _context.CommunityImages.Update(communityImage);
+    //    }
+
+
+    //    var result = await _context.SaveChangesAsync() > 0 ? true : false;
+    //    if (!result)
+    //        return new UpdateCommunityMiniPhotoResult
+    //        {
+    //            Status = UpdateCommunityMiniPhotoStatus.ErrorWhileUpdating
+    //        };
+
+    //    return new UpdateCommunityMiniPhotoResult
+    //    {
+    //        Status = UpdateCommunityMiniPhotoStatus.Successful
+    //    };
+    //}
+
+    public async Task<UpdateCommunityPhotoResult> UpdatePhoto(int commId, IFormFile file, string username)
     {
         var user = await _userRepository.GetUser(username);
         if (user is null)
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.UserDoesntExist
+                Status = UpdateCommunityPhotoStatus.UserDoesntExist
             };
 
         // проверка сообщества - есть ли в базе?
@@ -228,46 +320,63 @@ public class CommunityService
             .FirstOrDefaultAsync();
 
         if (community is null)
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.CommunityDoesntExist
+                Status = UpdateCommunityPhotoStatus.CommunityDoesntExist
             };
 
 
         // принадлежит ли комьюнити пользователю
         if (!(user?.Id == community.Owner.Id))
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.UserHasNoAccess
+                Status = UpdateCommunityPhotoStatus.UserHasNoAccess
             };
 
         // проверка РАЗМЕРА ФАЙЛА
         var lengthMb = file.Length / 1024 / 1024;
         if (lengthMb > 5)
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.FileTooBig
+                Status = UpdateCommunityPhotoStatus.FileTooBig
             };
 
         // Проверка - картинка ли это
         if (!file.ContentType.StartsWith("image/"))
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.IncorrectFormat
+                Status = UpdateCommunityPhotoStatus.IncorrectFormat
             };
 
         var relativePath = $"images\\community\\{commId}";
-        var fileName = "mini.jpg";
+
+        var fileNameSmall = "small.jpg";
+        var fileNameMini = "mini.jpg";
+        var fileNameBig = "big.jpg";
+
         var concretePath = Path.Combine(_env.WebRootPath, relativePath);
 
         if (!Path.Exists(concretePath))
             Directory.CreateDirectory(concretePath);
 
-        var fullPath = Path.Combine(concretePath, fileName);
+        var fullPathSmall = Path.Combine(concretePath, fileNameSmall);
+        var fullPathMini = Path.Combine(concretePath, fileNameMini);
+        var fullPathBig = Path.Combine(concretePath, fileNameBig);
 
         using var image = Image.Load(file.OpenReadStream());
-        image.Mutate(x => x.Resize(50, 50));
-        image.SaveAsJpeg(fullPath);
+
+        image.Mutate(x => x.Resize(384, 384));
+        image.SaveAsJpeg(fullPathBig);
+
+
+
+        image.Mutate(x => x.Resize(288, 288));
+        image.SaveAsJpeg(fullPathSmall);
+
+
+        image.Mutate(x => x.Resize(100, 100));
+        image.SaveAsJpeg(fullPathMini);
+
 
         var communityImage = await _context
             .CommunityImages
@@ -275,124 +384,37 @@ public class CommunityService
             .FirstOrDefaultAsync();
 
         // путь по которому мы будем получать картинку на фронтенде
-        var miniPath = $"/images/community/{commId}/mini.jpg";
-
+        var smallPath = $"/images/community/{commId}/{fileNameSmall}";
+        var miniPath = $"/images/community/{commId}/{fileNameMini}";
+        var bigPath = $"/images/community/{commId}/{fileNameBig}";
         // если не было CommunityImage записи 
         if (communityImage is null)
         {
             communityImage = new CommunityImage() { CommunityId = community.CommunityId };
+            communityImage.SmallPath = smallPath;
             communityImage.MiniPath = miniPath;
+            communityImage.BigPath = bigPath;
             _context.CommunityImages.Add(communityImage);
         }
         else
         {
+            communityImage.SmallPath = smallPath;
             communityImage.MiniPath = miniPath;
+            communityImage.BigPath = bigPath;
             _context.CommunityImages.Update(communityImage);
         }
 
 
         var result = await _context.SaveChangesAsync() > 0 ? true : false;
         if (!result)
-            return new UpdateCommunityMiniPhotoResult
+            return new UpdateCommunityPhotoResult
             {
-                Status = UpdateCommunityMiniPhotoStatus.ErrorWhileUpdating
+                Status = UpdateCommunityPhotoStatus.ErrorWhileUpdating
             };
 
-        return new UpdateCommunityMiniPhotoResult
+        return new UpdateCommunityPhotoResult
         {
-            Status = UpdateCommunityMiniPhotoStatus.Successful
-        };
-    }
-
-    public async Task<UpdateCommunitySmallPhotoResult> UpdateSmallPhoto(int commId, IFormFile file, string username)
-    {
-        var user = await _userRepository.GetUser(username);
-        if (user is null)
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.UserDoesntExist
-            };
-
-        // проверка сообщества - есть ли в базе?
-        var community = await _context.Communities
-            .Include(c => c.Owner)
-            .Where(c => c.CommunityId == commId)
-            .FirstOrDefaultAsync();
-
-        if (community is null)
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.CommunityDoesntExist
-            };
-
-
-        // принадлежит ли комьюнити пользователю
-        if (!(user?.Id == community.Owner.Id))
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.UserHasNoAccess
-            };
-
-        // проверка РАЗМЕРА ФАЙЛА
-        var lengthMb = file.Length / 1024 / 1024;
-        if (lengthMb > 5)
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.FileTooBig
-            };
-
-        // Проверка - картинка ли это
-        if (!file.ContentType.StartsWith("image/"))
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.IncorrectFormat
-            };
-
-        var relativePath = $"images\\community\\{commId}";
-        var fileName = "small.jpg";
-        var concretePath = Path.Combine(_env.WebRootPath, relativePath);
-
-        if (!Path.Exists(concretePath))
-            Directory.CreateDirectory(concretePath);
-
-        var fullPath = Path.Combine(concretePath, fileName);
-
-        using var image = Image.Load(file.OpenReadStream());
-        image.Mutate(x => x.Resize(144, 144));
-        image.SaveAsJpeg(fullPath);
-
-        var communityImage = await _context
-            .CommunityImages
-            .Where(ci => ci.CommunityId == community.CommunityId)
-            .FirstOrDefaultAsync();
-
-        // путь по которому мы будем получать картинку на фронтенде
-        var smallPath = $"/images/community/{commId}/{fileName}";
-
-        // если не было CommunityImage записи 
-        if (communityImage is null)
-        {
-            communityImage = new CommunityImage() { CommunityId = community.CommunityId };
-            communityImage.SmallPath = smallPath;
-            _context.CommunityImages.Add(communityImage);
-        }
-        else
-        {
-            communityImage.SmallPath = smallPath;
-            _context.CommunityImages.Update(communityImage);
-        }
-
-
-        var result = await _context.SaveChangesAsync() > 0 ? true : false;
-        if (!result)
-            return new UpdateCommunitySmallPhotoResult
-            {
-                Status = UpdateCommunitySmallPhotoStatus.ErrorWhileUpdating
-            };
-
-        return new UpdateCommunitySmallPhotoResult
-        {
-            Status = UpdateCommunitySmallPhotoStatus.Successful
+            Status = UpdateCommunityPhotoStatus.Successful
         };
     }
 }

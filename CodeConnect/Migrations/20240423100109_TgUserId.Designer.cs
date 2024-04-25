@@ -3,6 +3,7 @@ using System;
 using CodeConnect.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeConnect.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240423100109_TgUserId")]
+    partial class TgUserId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -333,25 +336,6 @@ namespace CodeConnect.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("CodeConnect.Entities.TelegramConnection", b =>
-                {
-                    b.Property<Guid>("TelegramConnectionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Tag")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("TelegramConnectionId");
-
-                    b.ToTable("TelegramConnections");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -568,8 +552,8 @@ namespace CodeConnect.Migrations
                     b.Property<int?>("CityId")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("TgUserId")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("TgUserId")
+                        .HasColumnType("integer");
 
                     b.HasIndex("CityId");
 

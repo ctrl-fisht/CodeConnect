@@ -1,4 +1,4 @@
-﻿namespace CodeConnect.Features;
+﻿namespace CodeConnect.Features.Activities;
 
 public class UpdateActivityBannerPhotoResult
 {

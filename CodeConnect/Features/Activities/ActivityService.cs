@@ -33,7 +33,7 @@ public class ActivityService
             .Include(a => a.City)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
-            .Include(a => a.Community)
+            .Include(a => a.Community).ThenInclude(c => c.Image)
             .Include(a => a.Image)
             .Where(a => a.ActivityId == actId).FirstOrDefaultAsync();
         
@@ -410,7 +410,7 @@ public class ActivityService
         var fullPath = Path.Combine(concretePath, fileName);
 
         using var image = Image.Load(file.OpenReadStream());
-        image.Mutate(x => x.Resize(144, 144));
+        image.Mutate(x => x.Resize(288, 288));
         image.SaveAsJpeg(fullPath);
 
         var activityImage = await _context
@@ -497,7 +497,7 @@ public class ActivityService
         var fullPath = Path.Combine(concretePath, fileName);
 
         using var image = Image.Load(file.OpenReadStream());
-        image.Mutate(x => x.Resize(1536, 384));
+        //image.Mutate(x => x.Resize(1536, 384));
         image.SaveAsJpeg(fullPath);
 
         var activityImage = await _context

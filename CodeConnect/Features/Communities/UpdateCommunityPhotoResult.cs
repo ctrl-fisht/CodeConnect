@@ -1,10 +1,10 @@
 ﻿namespace CodeConnect.Features.Communities;
 
-public class UpdateCommunitySmallPhotoResult
+public class UpdateCommunityPhotoResult
 {
-    public UpdateCommunitySmallPhotoStatus Status { get; set; }
+    public UpdateCommunityPhotoStatus Status { get; set; }
 }
-public enum UpdateCommunitySmallPhotoStatus
+public enum UpdateCommunityPhotoStatus
 {
     Successful,
     UserDoesntExist,

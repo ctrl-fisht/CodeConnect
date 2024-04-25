@@ -7,6 +7,9 @@ public class User : IdentityUser
     public string Bio { get; set; } = "";
 
     public City? City { get; set; } = null!;
+
+    public long? TgUserId { get; set; } = null;
+
     public IList<ActivityUser> ActivityUsers { get; set; } = new List<ActivityUser>();
     public IList<CommunityUser> CommunityUsers { get; set; } = new List<CommunityUser>();
     public IList<Activity> ActivitiesOwned { get; set; } = new List<Activity>();

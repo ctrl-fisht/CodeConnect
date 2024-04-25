@@ -50,5 +50,39 @@ public class UserRepository : IUserRepository
             .Include(u => u.City)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> SetTgId(int tgId, string name)
+    {
+        var user = await GetUser(name);
+
+        if (user is null)
+            return false;
+
+        user.TgUserId = tgId;
+        _context.Update(user);
+
+        return await Save();
+    }
+
+    public async Task<bool> RemoveTgId(string name)
+    {
+        var user = await GetUser(name);
+
+        if (user is null)
+            return false;
+
+        user.TgUserId = null;
+        _context.Update(user);
+
+        return await Save();
+    }
+
+    public async Task<User?> GetUserById(string id)
+    {
+        return await _context.AppUsers
+            .Where(u => u.Id == id)
+            .Include(u => u.City)
+            .FirstOrDefaultAsync();
+    }
 }
 

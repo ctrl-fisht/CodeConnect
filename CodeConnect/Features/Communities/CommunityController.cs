@@ -143,69 +143,69 @@ public class CommunityController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize]
-    [HttpPut]
-    [Route("{commId}/image/mini")]
-    public async Task<IActionResult> UpdateMiniImage(int commId, IFormFile file)
-    {
-        var result = await _communityService.UpdateMiniPhoto(commId, file, User.Identity.Name);
+    //[Authorize]
+    //[HttpPut]
+    //[Route("{commId}/image/mini")]
+    //public async Task<IActionResult> UpdateMiniImage(int commId, IFormFile file)
+    //{
+    //    var result = await _communityService.UpdateMiniPhoto(commId, file, User.Identity.Name);
 
-        switch (result.Status)
-        {
-            case UpdateCommunityMiniPhotoStatus.UserDoesntExist:
-                return BadRequest(new { success = false, message = "Ошибка авторизации" });
+    //    switch (result.Status)
+    //    {
+    //        case UpdateCommunityMiniPhotoStatus.UserDoesntExist:
+    //            return BadRequest(new { success = false, message = "Ошибка авторизации" });
 
-            case UpdateCommunityMiniPhotoStatus.ErrorWhileUpdating:
-                return StatusCode(500, new { success = false, message = "Ошибка во время обновления" });
+    //        case UpdateCommunityMiniPhotoStatus.ErrorWhileUpdating:
+    //            return StatusCode(500, new { success = false, message = "Ошибка во время обновления" });
 
-            case UpdateCommunityMiniPhotoStatus.CommunityDoesntExist:
-                return NotFound(new { success = false, message = "Данного сообщества не существует" });
+    //        case UpdateCommunityMiniPhotoStatus.CommunityDoesntExist:
+    //            return NotFound(new { success = false, message = "Данного сообщества не существует" });
 
-            case UpdateCommunityMiniPhotoStatus.Successful:
-                return StatusCode(201, new { success = true, message = "Фото успешно обновлено" });
+    //        case UpdateCommunityMiniPhotoStatus.Successful:
+    //            return StatusCode(201, new { success = true, message = "Фото успешно обновлено" });
 
-            case UpdateCommunityMiniPhotoStatus.IncorrectFormat:
-                return BadRequest(new { success = false, message = "Неправильный формат файла, поддерживаются только изображения" });
+    //        case UpdateCommunityMiniPhotoStatus.IncorrectFormat:
+    //            return BadRequest(new { success = false, message = "Неправильный формат файла, поддерживаются только изображения" });
 
-            case UpdateCommunityMiniPhotoStatus.FileTooBig:
-                return BadRequest(new { success = false, message = "Размер файла не должен превышать 5 МБ" });
+    //        case UpdateCommunityMiniPhotoStatus.FileTooBig:
+    //            return BadRequest(new { success = false, message = "Размер файла не должен превышать 5 МБ" });
 
-            case UpdateCommunityMiniPhotoStatus.UserHasNoAccess:
-                return StatusCode(401, new { success = true, message = "У вас нет доступа к этому сообществу" });
+    //        case UpdateCommunityMiniPhotoStatus.UserHasNoAccess:
+    //            return StatusCode(401, new { success = true, message = "У вас нет доступа к этому сообществу" });
 
-            // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
-            default: throw new ArgumentOutOfRangeException();
-        }
-    }
+    //        // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
+    //        default: throw new ArgumentOutOfRangeException();
+    //    }
+    //}
 
     [Authorize]
     [HttpPut]
     [Route("{commId}/image/small")]
     public async Task<IActionResult> UpdateSmallImage(int commId, IFormFile file)
     {
-        var result = await _communityService.UpdateSmallPhoto(commId, file, User.Identity.Name);
+        var result = await _communityService.UpdatePhoto(commId, file, User.Identity.Name);
 
         switch (result.Status)
         {
-            case UpdateCommunitySmallPhotoStatus.UserDoesntExist:
+            case UpdateCommunityPhotoStatus.UserDoesntExist:
                 return BadRequest(new { success = false, message = "Ошибка авторизации" });
 
-            case UpdateCommunitySmallPhotoStatus.ErrorWhileUpdating:
+            case UpdateCommunityPhotoStatus.ErrorWhileUpdating:
                 return StatusCode(500, new { success = false, message = "Ошибка во время обновления" });
 
-            case UpdateCommunitySmallPhotoStatus.CommunityDoesntExist:
+            case UpdateCommunityPhotoStatus.CommunityDoesntExist:
                 return NotFound(new { success = false, message = "Данного сообщества не существует" });
 
-            case UpdateCommunitySmallPhotoStatus.Successful:
+            case UpdateCommunityPhotoStatus.Successful:
                 return StatusCode(201, new { success = true, message = "Фото успешно обновлено" });
 
-            case UpdateCommunitySmallPhotoStatus.IncorrectFormat:
+            case UpdateCommunityPhotoStatus.IncorrectFormat:
                 return BadRequest(new { success = false, message = "Неправильный формат файла, поддерживаются только изображения" });
 
-            case UpdateCommunitySmallPhotoStatus.FileTooBig:
+            case UpdateCommunityPhotoStatus.FileTooBig:
                 return BadRequest(new { success = false, message = "Размер файла не должен превышать 5 МБ" });
 
-            case UpdateCommunitySmallPhotoStatus.UserHasNoAccess:
+            case UpdateCommunityPhotoStatus.UserHasNoAccess:
                 return StatusCode(401, new { success = true, message = "У вас нет доступа к этому сообществу" });
 
             // недосягаемый код т.к. бизнес логика возвращает всегда Status в пределах enum
