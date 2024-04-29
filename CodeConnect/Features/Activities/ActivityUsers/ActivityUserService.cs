@@ -23,6 +23,7 @@ public class ActivityUserService
         _mapper = mapper;
     }
 
+    // add to calendar
     public async Task<CreateActivityUserResult> Create(int actId, string userName)
     {
 
@@ -61,7 +62,20 @@ public class ActivityUserService
             UserId = user.Id
         });
 
+
+        if (user.EnableTgNotif == true && user.TgUserId != null)
+        {
+            _context.Add(new Notification()
+            {
+                TgUserId = user.TgUserId.Value,
+                Activity = activity,
+                SentFirst = false,
+                SentSecond = false
+            });
+        }
+
         var result = await _context.SaveChangesAsync() > 0 ? true : false;
+
 
         if (!result)
             return new CreateActivityUserResult
@@ -105,6 +119,17 @@ public class ActivityUserService
             {
                 Status = DeleteActivityUserStatus.DoesntExists
             };
+        
+        // удаление уведомления если есть
+        if (user.TgUserId != null && user.EnableTgNotif == true)
+        {
+            var notification = _context
+                .Notifications.Where(n => n.Activity.ActivityId == actId && user.TgUserId == n.TgUserId)
+                .FirstOrDefault();
+            if (notification != null)
+                _context.Remove(notification);
+        }
+
         _context.Remove(relation);
 
         var result = await _context.SaveChangesAsync() > 0 ? true : false;

@@ -3,6 +3,7 @@ using System;
 using CodeConnect.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeConnect.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240426143020_EnableTgNotificationField")]
+    partial class EnableTgNotificationField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,33 +313,6 @@ namespace CodeConnect.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CommunityUsers");
-                });
-
-            modelBuilder.Entity("CodeConnect.Entities.Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NotificationId"));
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("SentFirst")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("SentSecond")
-                        .HasColumnType("boolean");
-
-                    b.Property<long>("TgUserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("NotificationId");
-
-                    b.HasIndex("ActivityId");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CodeConnect.Entities.Tag", b =>
@@ -732,17 +708,6 @@ namespace CodeConnect.Migrations
                     b.Navigation("Community");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CodeConnect.Entities.Notification", b =>
-                {
-                    b.HasOne("CodeConnect.Entities.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

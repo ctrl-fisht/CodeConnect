@@ -3,6 +3,7 @@ using System;
 using CodeConnect.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeConnect.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240429095640_AddNotificationsTable")]
+    partial class AddNotificationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,21 +323,36 @@ namespace CodeConnect.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NotificationId"));
 
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("integer");
+                    b.Property<string>("CityName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<bool>("SentFirst")
+                    b.Property<string>("EventTitle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("LocalDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("LocalTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<bool>("Sent24")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("SentSecond")
+                    b.Property<bool>("Sent4")
                         .HasColumnType("boolean");
 
                     b.Property<long>("TgUserId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("NotificationId");
+                    b.Property<DateOnly>("UtcDate")
+                        .HasColumnType("date");
 
-                    b.HasIndex("ActivityId");
+                    b.Property<TimeOnly>("UtcTime")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("NotificationId");
 
                     b.ToTable("Notifications");
                 });
@@ -732,17 +750,6 @@ namespace CodeConnect.Migrations
                     b.Navigation("Community");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CodeConnect.Entities.Notification", b =>
-                {
-                    b.HasOne("CodeConnect.Entities.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

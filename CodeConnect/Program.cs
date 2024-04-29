@@ -7,6 +7,7 @@ using CodeConnect.Features.Caterories;
 using CodeConnect.Features.Cities;
 using CodeConnect.Features.Communities;
 using CodeConnect.Features.Communities.CommunityUsers;
+using CodeConnect.Features.Notifications;
 using CodeConnect.Features.Tags;
 using CodeConnect.Features.Telegram;
 using CodeConnect.TelegramBot;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<CityService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<TelegramService>();
+builder.Services.AddScoped<NotificationService>();
 
 // add hosted services
 builder.Services.AddHostedService<TelegramBotService>();

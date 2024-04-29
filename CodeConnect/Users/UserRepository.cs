@@ -72,6 +72,8 @@ public class UserRepository : IUserRepository
             return false;
 
         user.TgUserId = null;
+        user.EnableTgNotif = false;
+
         _context.Update(user);
 
         return await Save();

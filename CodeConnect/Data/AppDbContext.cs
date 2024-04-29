@@ -33,5 +33,5 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ActivityImage> ActivityImages { get; set; }
     public DbSet<CommunityImage> CommunityImages { get; set; }
     public DbSet<TelegramConnection> TelegramConnections { get; set; }
-
+    public DbSet<Notification> Notifications { get; set; }
 }

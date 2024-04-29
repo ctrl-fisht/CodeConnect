@@ -10,6 +10,8 @@ public class User : IdentityUser
 
     public long? TgUserId { get; set; } = null;
 
+    public bool EnableTgNotif { get; set; } = false;
+
     public IList<ActivityUser> ActivityUsers { get; set; } = new List<ActivityUser>();
     public IList<CommunityUser> CommunityUsers { get; set; } = new List<CommunityUser>();
     public IList<Activity> ActivitiesOwned { get; set; } = new List<Activity>();
