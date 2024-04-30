@@ -245,4 +245,14 @@ public class ActivityController : ControllerBase
             default: throw new ArgumentOutOfRangeException();
         }
     }
+
+    [Authorize]
+    [HttpGet]
+    [Route("{actId}/my")]
+    public async Task<IActionResult> IsMyActivity(int actId)
+    {
+        var result = _activityService.IsUserActivity(User.Identity.Name, actId);
+
+        return Ok(new { result = result });
+    }
 }

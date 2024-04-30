@@ -8,6 +8,7 @@ using CodeConnect.Features.Cities;
 using CodeConnect.Features.Communities;
 using CodeConnect.Features.Communities.CommunityUsers;
 using CodeConnect.Features.Notifications;
+using CodeConnect.Features.Notifications.Scheduling;
 using CodeConnect.Features.Tags;
 using CodeConnect.Features.Telegram;
 using CodeConnect.TelegramBot;
@@ -63,6 +64,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+// add custom quartz scheduling (features/notification/QuartzDependencyInjection.cs)
+builder.Services.AddTgNotification();
 
 builder.Services.AddAuthentication(options =>
 {

@@ -597,4 +597,13 @@ public class ActivityService
         return _mapper.Map<List<ActivityDto>>(activities);
     }
 
+    public async Task<bool> IsUserActivity(string username, int actId)
+    {
+        var user = await _userRepository.GetUser(username);
+
+        if (user is null)
+            return false;
+
+        return _context.Activities.Where(a => a.Owner.Id == user.Id && a.ActivityId == actId).Any();
+    }
 }
