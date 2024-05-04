@@ -63,15 +63,18 @@ public class ActivityUserService
         });
 
 
+        
         if (user.EnableTgNotif == true && user.TgUserId != null)
         {
-            _context.Add(new Notification()
-            {
-                TgUserId = user.TgUserId.Value,
-                Activity = activity,
-                SentFirst = false,
-                SentSecond = false
-            });
+            //var date = DateOnly.FromDateTime(DateTime.UtcNow);
+            //if (date < activity.DateUtc)
+                _context.Add(new Notification()
+                {
+                    TgUserId = user.TgUserId.Value,
+                    Activity = activity,
+                    SentFirst = false,
+                    SentSecond = false
+                });
         }
 
         var result = await _context.SaveChangesAsync() > 0 ? true : false;

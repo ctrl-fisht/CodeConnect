@@ -252,7 +252,7 @@ public class ActivityService
 
         }
         List<Tag> tags = null!;
-        if (input.TagsIds != null && input.TagsIds.Count > 0)
+        if (input.TagsIds != null)
         {
             // Проверка тегов
             tags = new List<Tag>();
@@ -268,7 +268,7 @@ public class ActivityService
             }
         }
         List<Category> categories = null!;
-        if (input.CategoriesIds != null && input.CategoriesIds.Count > 0)
+        if (input.CategoriesIds != null)
         {
             // Проверка категорий
             categories = new List<Category>();
@@ -328,7 +328,7 @@ public class ActivityService
         if (input.WebsiteURL != null)
             activity.WebsiteURL = input.WebsiteURL;
         
-        if (input.TagsIds != null && input.TagsIds.Count > 0)
+        if (input.TagsIds != null)
         {
             activity.ActivityTags = new List<ActivityTag>();
             foreach (var tag in tags)
@@ -337,7 +337,7 @@ public class ActivityService
             }
         }
 
-        if (input.CategoriesIds != null && input.CategoriesIds.Count > 0)
+        if (input.CategoriesIds != null)
         {
             activity.ActivityCategories = new List<ActivityCategory>();
             foreach (var category in categories)

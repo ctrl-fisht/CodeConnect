@@ -2,7 +2,6 @@
 using CodeConnect.Dto;
 using CodeConnect.Data;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 
 namespace CodeConnect.Features.Activities.Search;
 
@@ -25,11 +24,17 @@ public class SearchService
         {
             query = query.Where(a => a.Title.ToLower().Contains(input.Title.ToLower()));
         }
-        // DateLocal
-        if (input.DateLocal != null)
+        // DateRange
+        if (input.DateRange != null)
         {
-            query = query.Where(a => a.DateLocal.Equals(input.DateLocal));
+            if (input.DateRange.Length == 1)
+                query = query.Where(a => a.DateLocal == input.DateRange[0]);
+            else
+            {
+                query = query.Where(a => a.DateLocal >= input.DateRange[0] && a.DateLocal <= input.DateRange[1]);
+            }
         }
+            
         // City
         if (input.CityId != null)
         {
