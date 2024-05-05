@@ -14,6 +14,8 @@ public class SearchActivityInput
     public bool? HasStream { get; set; } = null!;
     public bool? FreeTicket { get; set; } = null!;
 
+    public bool? Past { get; set; } = null!;
+
     public List<int>? TagsIds { get; set; } = null!;
     public List<int>? CategoriesIds { get; set; } = null!;
 }

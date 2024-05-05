@@ -4,6 +4,7 @@ using CodeConnect.Data;
 using CodeConnect.Entities;
 using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CodeConnect.Features.Activities.ActivityUsers;
 
@@ -173,9 +174,13 @@ public class ActivityUserService
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.Community)
             .Where(a => a.Members.Any(au => au.UserId == user.Id) && a.DateLocal.Year == year && a.DateLocal.Month == month)
+            .OrderBy(a => a.DateUtc)
+            .ThenBy(a => a.TimeUtc)
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
         
     }
+
+    
 }

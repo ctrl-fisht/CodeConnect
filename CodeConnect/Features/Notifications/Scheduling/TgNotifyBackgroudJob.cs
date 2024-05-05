@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace CodeConnect.Features.Notifications.Scheduling;
 
@@ -59,15 +60,32 @@ public class TgNotifyBackgroudJob : IJob
             Console.WriteLine($"Notification about: {notification.Activity.Title} \nActivity time UTC : {eventDateTimeUtc.ToString()}\nServer current time UTC: {dateTimeUtc.ToString()}" +
                 $"\nTime Difference {timeDifference.ToString()} TotalHours: {timeDifference.TotalHours}" );
 
-            var message = $"🔔 Напоминание о мероприятии \n📝 Название: {notification.Activity.Title} \n🗓 Дата: {notification.Activity.DateLocal} \n📌Город: {notification.Activity.City.Name} \n⏱ Время {notification.Activity.TimeLocal} (местное)";
+            Console.WriteLine($"Total hrs < 24 = {timeDifference.TotalHours < 24}");
+
+            var message = $"🔔 Напоминание о мероприятии \n" +
+                $"📝 Название: <b>{notification.Activity.Title}</b> \n" +
+                $"🗓 Дата: {notification.Activity.DateLocal} \n" +
+                $"📌Город: {notification.Activity.City.Name} \n" +
+                $"⏱ Время <b>{notification.Activity.TimeLocal}</b> (по г. {notification.Activity.City.Name})\n" +
+                $"🌐 <a href=\"http://localhost.com/events/{{notification.Activity.ActivityId}}\">Подробности</a>";
 
             if (notification.SentFirst == false)
             {
-                if (timeDifference.TotalHours < 24 && timeDifference.TotalHours > 4)
+                if (timeDifference.TotalHours < 24)
                 {
-                    var newMessage = "⚡️До мероприятия меньше 24 часов\n\n" + message;
-                    _bot.SendTextMessageAsync(notification.TgUserId, newMessage).Wait();
-                    notification.SentFirst = true;
+                    if (timeDifference.TotalHours > 4)
+                    {
+                        var newMessage = "⚡️До мероприятия меньше 24 часов\n\n" + message;
+                        _bot.SendTextMessageAsync(notification.TgUserId, newMessage, parseMode: ParseMode.Html).Wait();
+                        notification.SentFirst = true;
+                    }
+                    else
+                    {
+                        var newMessage = "⚡️⚡️⚡️До мероприятия осталось совсем немного\n\n" + message;
+                        _bot.SendTextMessageAsync(notification.TgUserId, newMessage, parseMode: ParseMode.Html).Wait();
+                        notification.SentFirst = true;
+                        notification.SentSecond = true;
+                    }
                 }
             }
 
@@ -76,7 +94,7 @@ public class TgNotifyBackgroudJob : IJob
                 var newMessage = "⚡️⚡️⚡️До мероприятия меньше 4 часов\n\n" + message;
                 if (timeDifference.TotalHours < 4)
                 {
-                    _bot.SendTextMessageAsync(notification.TgUserId, newMessage).Wait();
+                    _bot.SendTextMessageAsync(notification.TgUserId, newMessage, parseMode: ParseMode.Html).Wait();
                     notification.SentSecond = true;
                 }
             }

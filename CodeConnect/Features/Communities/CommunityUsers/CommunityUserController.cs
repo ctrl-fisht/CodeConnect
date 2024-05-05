@@ -93,6 +93,14 @@ public class CommunityUserController : ControllerBase
         return Ok(new { result = await _communityUserService.IsSubscriber(User.Identity.Name, commId) });
     }
 
+    [Authorize]
+    [HttpGet]
+    [Route("community/subscribed/activities")]
+    public async Task<IActionResult> GetSubscribedActivities(int offset, int count)
+    {
+        var result = await _communityUserService.GetSubActivities(offset, count, User.Identity.Name);
+        return Ok(result);
+    }
 
 }
 

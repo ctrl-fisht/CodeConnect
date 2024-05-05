@@ -77,6 +77,15 @@ public class ActivityController : ControllerBase
         return Ok(activities);
     }
 
+    [Route("/past")]
+    [HttpGet]
+    public async Task<IActionResult> GetActivitiesPast(int offset, int count)
+    {
+        var activities = await _activityService.GetActivityListPast(offset, count);
+        return Ok(activities);
+    }
+
+
     [Authorize]
     [HttpPatch]
     [Route("{actId}")]
@@ -169,9 +178,9 @@ public class ActivityController : ControllerBase
     [Authorize]
     [HttpGet]
     [Route("my")]
-    public async Task<IActionResult> GetMyActivities()
+    public async Task<IActionResult> GetMyActivities(bool past = false)
     {
-        var result = await _activityService.GetUserActivities(User.Identity.Name);
+        var result = await _activityService.GetUserActivities(User.Identity.Name, past);
 
         return Ok(result);
     }

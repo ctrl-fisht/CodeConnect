@@ -67,6 +67,29 @@ public class SearchService
             query = query.Where(a => a.ActivityCategories.Any(ac => input.CategoriesIds.Contains(ac.CategoryId)));
         }
 
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
+        // Past
+        if (input.Past != null)
+        {
+
+            if (input.Past == true)
+            {
+                query = query.Where(a => a.DateUtc < date || (a.DateUtc == date && a.TimeUtc < time));
+                query = query.OrderByDescending(a => a.DateUtc).ThenByDescending(a => a.TimeUtc);
+            }
+            else
+            {
+                query = query.Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time));
+                query = query.OrderBy(a => a.DateUtc).ThenBy(a => a.TimeUtc);
+            }
+
+
+
+        }
+
         var activities = await query
             .Skip(offset)
             .Take(count)

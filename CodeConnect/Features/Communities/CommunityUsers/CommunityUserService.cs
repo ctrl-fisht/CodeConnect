@@ -147,6 +147,40 @@ public class CommunityUserService
         return await _context.CommunityUsers.AnyAsync(cu => cu.UserId == user.Id && cu.CommunityId == commId);
 
     }
+    public async Task<List<ActivityDto>> GetSubActivities(int offset, int count, string userName)
+    {
+        var user = await _userRepository.GetUser(userName);
+
+        if (user is null)
+            return new List<ActivityDto>();
+
+
+
+        var communities = await GetSubscribedCommunities(userName);
+        var communityIds = communities.Select(c => c.CommunityId).ToList();
+
+        if (communities.Count == 0)
+            return new List<ActivityDto>();
+
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
+        var activities = await _context
+            .Activities
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
+            .Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time))
+            .Where(a => communityIds.Contains(a.Community.CommunityId)).OrderBy(a => a.DateUtc)
+            .Skip(offset)
+            .Take(count)
+            .ToListAsync();
+
+        return _mapper.Map<List<ActivityDto>>(activities);
+    }
 }
 #pragma warning restore CS8602
 #pragma warning disable CS8604

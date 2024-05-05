@@ -166,6 +166,36 @@ public class ActivityService
 
     public async Task<List<ActivityDto>> GetActivityList(int offset, int count)
     {
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
+
+        var activities = await _context
+            .Activities
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
+            .Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time))
+            .OrderBy(a => a.DateUtc)
+            .ThenBy(a => a.TimeUtc)
+            .Skip(offset)
+            .Take(count)
+            .ToListAsync();
+
+        return _mapper.Map<List<ActivityDto>>(activities);
+
+
+    }
+
+    public async Task<List<ActivityDto>> GetActivityListPast(int offset, int count)
+    {
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
         var activities = await _context
             .Activities
             .Skip(offset)
@@ -175,7 +205,9 @@ public class ActivityService
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.Image)
-            .OrderBy(a => a.DateUtc)
+            .Where(a => a.DateUtc < date || (a.DateUtc == date && a.TimeUtc < time))
+            .OrderByDescending(a => a.DateUtc)
+            .ThenByDescending(a => a.TimeUtc)
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
@@ -288,17 +320,16 @@ public class ActivityService
             activity.Title = input.Title;
 
 
-        if (input.DateLocal != null)
+        if (input.DateLocal != null && input.TimeLocal != null)
         {
-            activity.DateUtc = activity.DateLocal;
+            // считаем из локального времени + часового пояса города в котором мероприятие - UTC время и дату
+            var utcDateAndTime = TimeConverter.CalculateUtcFromLocal(input.DateLocal.Value, input.TimeLocal.Value, city.UtcOffsetHours);
+
+            activity.DateUtc = utcDateAndTime.Item1;
             activity.DateLocal = (DateOnly)input.DateLocal;
-        }
 
-
-        if (input.TimeLocal != null)
-        {
             activity.TimeLocal = (TimeOnly)input.TimeLocal;
-            activity.TimeUtc = activity.TimeLocal.AddHours(activity.City.UtcOffsetHours);
+            activity.TimeUtc = utcDateAndTime.Item2;
         }
 
         if (input.CityId != null)
@@ -576,14 +607,21 @@ public class ActivityService
         };
     }
 
-    public async Task<List<ActivityDto>> GetUserActivities(string username)
+    public async Task<List<ActivityDto>> GetUserActivities(string username, bool past)
     {
         var user = await _userRepository.GetUser(username);
 
         if (user is null)
             return new List<ActivityDto>();
 
-        var activities = await _context
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
+        List<Activity> activities = new List<Activity>();
+
+        if (past)
+            activities = await _context
             .Activities
             .Include(a => a.Owner)
             .Include(a => a.City)
@@ -592,6 +630,23 @@ public class ActivityService
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.Image)
             .Where(a => a.Owner.Id == user.Id)
+            .Where(a => a.DateUtc < date || (a.DateUtc == date && a.TimeUtc < time))
+            .OrderByDescending(a => a.DateUtc)
+            .ThenByDescending(a => a.TimeUtc)
+            .ToListAsync();
+        else
+        activities = await _context
+            .Activities
+            .Include(a => a.Owner)
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
+            .Where(a => a.Owner.Id == user.Id)
+            .Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time))
+            .OrderBy(a => a.DateUtc)
+            .ThenBy(a => a.TimeUtc)
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);

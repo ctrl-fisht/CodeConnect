@@ -165,6 +165,16 @@ public class CommunityService
         if (input.Name != null)
             community.Name = input.Name;
 
+        if (input.Email != null)
+            community.Email = input.Email;
+
+        if (input.Phone != null)
+            community.Phone = input.Phone;
+
+        if (input.TelegramTag != null)
+            community.TelegramTag = input.TelegramTag;
+
+
         _context.Update(community);
         var result = await _context.SaveChangesAsync() > 0 ? true : false;
 
@@ -199,6 +209,10 @@ public class CommunityService
 
     public async Task<List<ActivityDto>> GetCommunityActivities(int commId)
     {
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
         var activities = await _context
             .Activities
             .Include(a => a.Community)
@@ -207,6 +221,7 @@ public class CommunityService
             .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
             .Where(a => a.Community.CommunityId == commId)
+            .Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time))
             .ToListAsync();
 
         return _mapper.Map<List<ActivityDto>>(activities);
@@ -417,4 +432,5 @@ public class CommunityService
             Status = UpdateCommunityPhotoStatus.Successful
         };
     }
+
 }

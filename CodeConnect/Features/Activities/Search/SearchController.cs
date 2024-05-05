@@ -16,7 +16,6 @@ public class SearchController : ControllerBase
 
 
     [Route("filter")]
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> SearchActivities([FromBody] SearchActivityInput input, int offset, int count)
     {
