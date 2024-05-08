@@ -67,7 +67,7 @@ public class TgNotifyBackgroudJob : IJob
                 $"🗓 Дата: {notification.Activity.DateLocal} \n" +
                 $"📌Город: {notification.Activity.City.Name} \n" +
                 $"⏱ Время <b>{notification.Activity.TimeLocal}</b> (по г. {notification.Activity.City.Name})\n" +
-                $"🌐 <a href=\"http://localhost.com/events/{{notification.Activity.ActivityId}}\">Подробности</a>";
+                $"🌐 <a href=\"http://localhost.com/events/{notification.Activity.ActivityId}\">Подробности</a>";
 
             if (notification.SentFirst == false)
             {

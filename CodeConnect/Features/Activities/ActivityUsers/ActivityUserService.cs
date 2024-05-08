@@ -160,14 +160,35 @@ public class ActivityUserService
         return _context.ActivityUsers.Any(au => au.ActivityId == actId && au.UserId == user.Id);
     }
 
-    public async Task<List<ActivityDto>> GetMonthActivities (int month, int year, string userName)
+    public async Task<List<ActivityDto>> GetMonthActivities (int month, int year, string userName, bool past = false)
     {
         var user = await _userRepository.GetUser(userName);
 
         if (user is null)
             return new List<ActivityDto>();
 
-        var activities = await _context
+        var dateTime = DateTime.UtcNow;
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = TimeOnly.FromDateTime(dateTime);
+
+        List<Activity> activities;
+        if (past == false)
+        {
+            activities = await _context
+            .Activities
+            .Include(a => a.City)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Community)
+            .Where(a => a.Members.Any(au => au.UserId == user.Id) && a.DateLocal.Year == year && a.DateLocal.Month == month)
+            .Where(a => a.DateUtc > date || (a.DateUtc == date && a.TimeUtc > time))
+            .OrderBy(a => a.DateUtc)
+            .ThenBy(a => a.TimeUtc)
+            .ToListAsync();
+        }
+        else
+        {
+            activities = await _context
             .Activities
             .Include(a => a.City)
             .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
@@ -177,10 +198,10 @@ public class ActivityUserService
             .OrderBy(a => a.DateUtc)
             .ThenBy(a => a.TimeUtc)
             .ToListAsync();
+        }
 
         return _mapper.Map<List<ActivityDto>>(activities);
         
     }
 
-    
 }

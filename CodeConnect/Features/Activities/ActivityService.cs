@@ -6,6 +6,7 @@ using CodeConnect.Users;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace CodeConnect.Features.Activities;
@@ -27,6 +28,7 @@ public class ActivityService
 
     public async Task<ActivityDto?> Get(int actId)
     {
+
 
         var activity = await _context
             .Activities
@@ -130,8 +132,8 @@ public class ActivityService
         newActivity.TimeUtc = utcDateAndTime.Item2;
         newActivity.DateUtc = utcDateAndTime.Item1;
         
-        newActivity.IsActive = true;
-
+        newActivity.IsActive = false;
+        newActivity.Declined = false;
         newActivity.City = city;
 
         
@@ -226,6 +228,8 @@ public class ActivityService
         
         var activity = await _context
             .Activities
+            .IgnoreQueryFilters()
+            .Where(a => a.Deleted != true && a.Declined != true)
             .Where(a => a.ActivityId == actId)
             .Include(a => a.Owner)
             .Include(a => a.City)
@@ -402,7 +406,12 @@ public class ActivityService
             };
 
         // проверка мероприятия - есть ли в базе?
-        var activity = await _context.Activities.FindAsync(actId);
+        var activity = await _context.Activities
+            .IgnoreQueryFilters()
+            .Where(a => a.Deleted != true && a.Declined != true)
+            .Where(a => a.ActivityId == actId)
+            .FirstOrDefaultAsync();
+
         if (activity is null)
             return new UpdateActivitySmallPhotoResult
             {
@@ -489,7 +498,12 @@ public class ActivityService
             };
 
         // проверка мероприятия - есть ли в базе?
-        var activity = await _context.Activities.FindAsync(actId);
+        var activity = await _context.Activities
+            .IgnoreQueryFilters()
+            .Where(a => a.Deleted != true && a.Declined != true)
+            .Where(a => a.ActivityId == actId)
+            .FirstOrDefaultAsync();
+
         if (activity is null)
             return new UpdateActivityBannerPhotoResult
             {
@@ -575,9 +589,13 @@ public class ActivityService
                 Status = DeleteActivityStatus.UserDoesntExist
             };
 
-        
+
         // проверка мероприятия - есть ли в базе?
-        var activity = await _context.Activities.FindAsync(actId);
+        var activity = await _context.Activities
+            .IgnoreQueryFilters()
+            .Where(a => a.Deleted != true && a.Declined != true)
+            .Where(a => a.ActivityId == actId)
+            .FirstOrDefaultAsync();
         if (activity is null)
             return new DeleteActivityResult
             {
@@ -659,6 +677,70 @@ public class ActivityService
         if (user is null)
             return false;
 
-        return _context.Activities.Where(a => a.Owner.Id == user.Id && a.ActivityId == actId).Any();
+        return _context.Activities.IgnoreQueryFilters().Where(a => a.Owner.Id == user.Id && a.ActivityId == actId && a.Deleted == false).Any();
+    }
+
+    public async Task<List<ActivityDto>> GetUserModerationActivities(string username)
+    {
+        var user = await _userRepository.GetUser(username);
+
+        if (user is null)
+            return new List<ActivityDto>();
+
+        var activities = await _context
+            .Activities
+            .IgnoreQueryFilters()
+            .Include(a => a.Owner)
+            .Include(a => a.City)
+            .Include(a => a.Community)
+            .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+            .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+            .Include(a => a.Image)
+            .Where(a => a.Owner.Id == user.Id)
+            .Where(a => a.IsActive == false && a.Declined == false && a.Deleted == false)
+            .OrderByDescending(a => a.DateUtc)
+            .ThenByDescending(a => a.TimeUtc)
+            .ToListAsync();
+
+        return _mapper.Map<List<ActivityDto>>(activities);
+    }
+
+    public async Task<ActivityDto?> GetPreview(string username, int actId, bool admin = false)
+    {
+        var user = await _userRepository.GetUser(username);
+
+        Activity? activity;
+
+        if (user is null)
+            return null;
+        if (admin == false)
+            activity = await _context
+                .Activities
+                .IgnoreQueryFilters()
+                .Include(a => a.Owner)
+                .Include(a => a.City)
+                .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+                .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+                .Include(a => a.Community).ThenInclude(c => c.Image)
+                .Include(a => a.Image)
+                .Where(a => a.Deleted != true && a.Declined != true)
+                .Where(a => a.ActivityId == actId)
+                .Where(a => a.Owner.Id == user.Id)
+                .FirstOrDefaultAsync();
+        else
+            activity = await _context
+                .Activities
+                .IgnoreQueryFilters()
+                .Include(a => a.Owner)
+                .Include(a => a.City)
+                .Include(a => a.ActivityCategories).ThenInclude(ac => ac.Category)
+                .Include(a => a.ActivityTags).ThenInclude(at => at.Tag)
+                .Include(a => a.Community).ThenInclude(c => c.Image)
+                .Include(a => a.Image)
+                .Where(a => a.Deleted != true && a.Declined != true)
+                .Where(a => a.ActivityId == actId)
+                .FirstOrDefaultAsync();
+
+        return _mapper.Map<ActivityDto>(activity);
     }
 }

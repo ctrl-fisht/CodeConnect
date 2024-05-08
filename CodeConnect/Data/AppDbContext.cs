@@ -16,7 +16,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Activity>().HasQueryFilter(a => !a.Deleted);
+        modelBuilder.Entity<Activity>().HasQueryFilter(a => !a.Deleted && a.IsActive == true && a.Declined == false);
         modelBuilder.Entity<Community>().HasQueryFilter(c => !c.Deleted);
     }
 

@@ -15,6 +15,7 @@ public class Activity
     public string? StreamURL { get; set; }
     public string? WebsiteURL { get; set; }
     public bool IsActive { get; set; }
+    public bool Declined { get; set; }
     public int TicketPrice { get; set; }
     
     public bool Deleted { get; set; } = false;

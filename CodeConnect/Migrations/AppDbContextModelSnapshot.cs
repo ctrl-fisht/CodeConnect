@@ -46,6 +46,9 @@ namespace CodeConnect.Migrations
                     b.Property<DateOnly>("DateUtc")
                         .HasColumnType("date");
 
+                    b.Property<bool>("Declined")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("Deleted")
                         .HasColumnType("boolean");
 

@@ -1,4 +1,5 @@
-﻿using CodeConnect.Dto;
+﻿using CodeConnect.Data;
+using CodeConnect.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +22,7 @@ public class ActivityController : ControllerBase
     {
         // авторизован ли пользователь, если да то мероприятие без времени пользователя
         ActivityDto? activity = await _activityService.Get(actId);
-        
+
 
         if (activity is null)
             return NotFound();
@@ -77,7 +78,7 @@ public class ActivityController : ControllerBase
         return Ok(activities);
     }
 
-    [Route("/past")]
+    [Route("past")]
     [HttpGet]
     public async Task<IActionResult> GetActivitiesPast(int offset, int count)
     {
@@ -172,7 +173,7 @@ public class ActivityController : ControllerBase
             return NotFound();
 
         return Ok(result);
-        
+
     }
 
     [Authorize]
@@ -260,8 +261,36 @@ public class ActivityController : ControllerBase
     [Route("{actId}/my")]
     public async Task<IActionResult> IsMyActivity(int actId)
     {
-        var result = _activityService.IsUserActivity(User.Identity.Name, actId);
+        var result = await _activityService.IsUserActivity(User.Identity.Name, actId);
 
         return Ok(new { result = result });
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("my/moderation")]
+    public async Task<IActionResult> GetMyModerationActivities(int actId)
+    {
+        var result = await _activityService.GetUserModerationActivities(User.Identity.Name);
+
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("{actId}/preview")]
+    public async Task<IActionResult> GetPreview(int actId)
+    {
+        var admin = false;
+        if (User.IsInRole(UserRoles.Admin))
+            admin = true;
+
+
+        var result = await _activityService.GetPreview(User.Identity.Name, actId, admin);
+
+        if (result == null)
+            return NotFound();
+
+        return Ok(result);
     }
 }

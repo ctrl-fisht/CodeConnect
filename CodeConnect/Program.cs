@@ -2,6 +2,7 @@ using CodeConnect.Data;
 using CodeConnect.Features.Activities;
 using CodeConnect.Features.Activities.ActivityUsers;
 using CodeConnect.Features.Activities.Search;
+using CodeConnect.Features.Admin;
 using CodeConnect.Features.Auth;
 using CodeConnect.Features.Caterories;
 using CodeConnect.Features.Cities;
@@ -38,6 +39,7 @@ builder.Services.AddScoped<CityService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<TelegramService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<AdminService>();
 
 // add hosted services
 builder.Services.AddHostedService<TelegramBotService>();

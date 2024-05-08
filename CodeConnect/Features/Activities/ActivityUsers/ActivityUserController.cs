@@ -84,9 +84,9 @@ public class ActivityUserController : ControllerBase
     [Authorize]
     [HttpGet]
     [Route("calendar/year/{year:int}/month/{month:int:range(1,12)}")]
-    public async Task<IActionResult> GetMonthActivities(int month, int year)
+    public async Task<IActionResult> GetMonthActivities(int month, int year, bool past = false)
     {
-        var result = await _activityUserService.GetMonthActivities(month, year, User.Identity.Name);
+        var result = await _activityUserService.GetMonthActivities(month, year, User.Identity.Name, past);
         return Ok(result);
     }
 }
