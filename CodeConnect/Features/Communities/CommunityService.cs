@@ -363,7 +363,7 @@ public class CommunityService
                 Status = UpdateCommunityPhotoStatus.IncorrectFormat
             };
 
-        var relativePath = $"images\\community\\{commId}";
+        var relativePath = $"images/community/{commId}";
 
         var fileNameSmall = "small.jpg";
         var fileNameMini = "mini.jpg";

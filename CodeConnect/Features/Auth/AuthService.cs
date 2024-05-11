@@ -23,12 +23,11 @@ public class AuthService
         _roleManager = roleManager;
         _configuration = configuration;
     }
+#pragma warning disable CS8604
 
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
-        #pragma warning disable CS8604
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
-        #pragma warning restore CS8602
 
         var token = new JwtSecurityToken(
             issuer: _configuration["JWT:Issuer"],

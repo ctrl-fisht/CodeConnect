@@ -2,18 +2,53 @@ version: '3.4'
 
 services:
   db:
+    hostname: database
     image: postgres:latest
     environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
         POSTGRES_DB: codeconnect
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
 
-  codeconnect:
+
+  api:
+    hostname: codeconnect
     image: ${DOCKER_REGISTRY-}codeconnect
     build:
       context: .
       dockerfile: CodeConnect/Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./CodeConnect/wwwroot/images:/app/wwwroot/images
+    networks:
+      - internal
+
+  frontend:
+    hostname: frontend
+    networks:
+      - internal
+    build: codeconnect_frontend
+    depends_on: 
+      - api
+
+  caddy:
+    hostname: caddy
+    image: caddy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
     ports:
-      - "5259" 
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - frontend
+      - api
+    networks:
+      - internal
+    
+
+networks:
+  internal:

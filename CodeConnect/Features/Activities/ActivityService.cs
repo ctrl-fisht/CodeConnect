@@ -440,7 +440,7 @@ public class ActivityService
                 Status = UpdateActivitySmallPhotoStatus.IncorrectFormat
             };
 
-        var relativePath = $"images\\activity\\{actId}";
+        var relativePath = $"images/activity/{actId}";
         var fileName = "small.jpg";
         var concretePath = Path.Combine(_env.WebRootPath, relativePath);
 
@@ -532,7 +532,7 @@ public class ActivityService
                 Status = UpdateActivityBannerPhotoStatus.IncorrectFormat
             };
 
-        var relativePath = $"images\\activity\\{actId}";
+        var relativePath = $"images/activity/{actId}";
         var fileName = "banner.jpg";
         var concretePath = Path.Combine(_env.WebRootPath, relativePath);
 

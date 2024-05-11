@@ -1,4 +1,4 @@
-using CodeConnect.Data;
+﻿using CodeConnect.Data;
 using CodeConnect.Features.Activities;
 using CodeConnect.Features.Activities.ActivityUsers;
 using CodeConnect.Features.Activities.Search;
@@ -23,6 +23,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseKestrel();
+
+Console.WriteLine($"ASPNETCORE_URLS: {Environment.GetEnvironmentVariable("ASPNETCORE_URLS")}");
+Console.WriteLine($"ASPNETCORE_Kestrel__Endpoints__Https__Url: {Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Endpoints__Https__Url")}");
+// ... остальной код
+Thread.Sleep(5);
 
 // add user repository (DRY reasons)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -40,7 +46,7 @@ builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<TelegramService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<AdminService>();
-
+builder.Services.AddScoped<Seed>();
 // add hosted services
 builder.Services.AddHostedService<TelegramBotService>();
 
@@ -99,17 +105,19 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:8080/", "http://localhost:8081/", "http://localhost:8080")
+            policy.WithOrigins(
+                "http://localhost",
+                "http://localhost/",
+                "https://localhost",
+                "https://localhost/")
             .AllowAnyMethod()
             .AllowAnyHeader();
         });
 });
 
 // add seed service
-if (args.Length == 1 && args[0].ToLower() == "seeddata")
-    builder.Services.AddScoped<Seed>();
 
-// add swagger in develompment environment
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen(opt =>
@@ -146,10 +154,9 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+app.UseSwagger();
     app.UseSwaggerUI();
 }
 
@@ -171,12 +178,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-if (args.Length == 1 && args[0].ToLower() == "seeddata")
-{
-    SeedData(app);
-    return;
-}
-    
+
+
+SeedData(app);
+
+
 
 
 app.Run();
@@ -191,9 +197,14 @@ void SeedData(IHost app)
     using (var scope = scopedFactory.CreateScope())
     {
         var services = scope.ServiceProvider;
-        var seed = scope.ServiceProvider.GetService<Seed>();
-        UserRoleInitializer.InitializeAsync(services).Wait();
-        seed.SeedDbContext();
+        var context = scope.ServiceProvider.GetService<AppDbContext>();
+        if (context.AppUsers.Where(u => u.UserName == "handakai").FirstOrDefault() == null)
+        {
+            var seed = scope.ServiceProvider.GetService<Seed>();
+            UserRoleInitializer.InitializeAsync(services).Wait();
+            seed.SeedDbContext();
+        }
+           
     }
 #pragma warning restore CS8602
 #pragma warning restore CS8604

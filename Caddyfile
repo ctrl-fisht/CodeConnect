@@ -1,0 +1,8 @@
+localhost:80 {
+    reverse_proxy /api/* codeconnect:8080
+
+    reverse_proxy /images/* codeconnect:8080
+    
+    reverse_proxy frontend:8080
+    
+}
