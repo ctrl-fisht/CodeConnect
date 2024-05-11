@@ -16,7 +16,6 @@
               <DropdownOwner v-model:isOpen="ownerDropdownVisible"/>
             </li>
             <li class="mx-5 hover:text-orange-400"><router-link to="/events">Мероприятия</router-link></li>
-            <li class="mx-5 hover:text-orange-400"><router-link to="/admin" v-if="isAdmin">Админ-панель</router-link></li>
           </ul>
         </nav>
         <DropdownUser v-if="this.currentUser" v-model:isOpen="userDropdownVisible"/>
@@ -55,8 +54,6 @@ export default {
     this.checkTokenExpiration();
     // Запуск функции каждые несколько секунд
     setInterval(this.checkTokenExpiration, 5000);
-    if (this.currentUser)
-      this.fetchIsAdmin();
   },
   data() {
     return{
@@ -65,7 +62,6 @@ export default {
       memberDropdownVisible: false,
       ownerDropdownVisible: false,
       userDropdownVisible: false,
-      isAdmin: false
     }
   },
   methods: {
@@ -77,19 +73,6 @@ export default {
           localStorage.removeItem('user');
         }
       }
-    },
-    fetchIsAdmin(){
-      this.$store.dispatch("user/getMyRole").then(
-          data => {
-            console.log(data);
-            if (data.includes("Admin"))
-              this.isAdmin = true;
-          },
-          error => {
-            localStorage.removeItem('user');
-            this.$router.push('/');
-          }
-      );
     },
     loginDialogRequest() {
       this.loginDialogVisible = true;
