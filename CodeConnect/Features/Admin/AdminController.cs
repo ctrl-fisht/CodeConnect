@@ -20,7 +20,7 @@ public class AdminController : ControllerBase
     [Route("approve/{actId}")]
     public async Task<IActionResult> ApproveActivity(int actId)
     {
-        var result = _adminService.ApproveActivity(actId);
+        var result = await _adminService.ApproveActivity(actId);
         return Ok(new {result = result});
     }
 
@@ -29,7 +29,7 @@ public class AdminController : ControllerBase
     [Route("decline/{actId}")]
     public async Task<IActionResult> DeclineActivity(int actId)
     {
-        var result = _adminService.DeclineActivity(actId);
+        var result = await  _adminService.DeclineActivity(actId);
         return Ok(new { result = result });
     }
 

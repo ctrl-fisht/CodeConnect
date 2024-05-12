@@ -25,11 +25,6 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseKestrel();
 
-Console.WriteLine($"ASPNETCORE_URLS: {Environment.GetEnvironmentVariable("ASPNETCORE_URLS")}");
-Console.WriteLine($"ASPNETCORE_Kestrel__Endpoints__Https__Url: {Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Endpoints__Https__Url")}");
-// ... остальной код
-Thread.Sleep(5);
-
 // add user repository (DRY reasons)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
